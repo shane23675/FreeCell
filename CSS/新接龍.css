@@ -1,0 +1,154 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+main {
+    overflow: hidden;
+    width: 1280px;
+    margin: 50px auto;
+}
+/*遊戲進行於playArea區塊*/
+#playArea {
+    position: relative;
+    width: 1175px;
+    height: 800px;
+    background: -webkit-linear-gradient(270deg, #525252, #001F1D);
+    background: -moz-linear-gradient(180deg, #525252, #001F1D);
+    background: -o-linear-gradient(180deg, #525252, #001F1D);
+    background: linear-gradient(180deg, #525252, #001F1D);
+    float: left;
+}
+/*遊戲選項*/
+aside {
+    position: relative;
+    width: 105px;
+    height: 800px;
+    float: left;
+    background: #001F1D;
+}
+aside .new_game {
+    width: 60px;
+    height: 82.91px;
+    position: absolute;
+    left: 23px;
+    top: 120px;
+    cursor: pointer;
+}
+aside .restart {
+    width: 87.99px;
+    height: 69.91px;
+    position: absolute;
+    left: 9px;
+    top: 252px;
+    cursor: pointer;
+}
+aside .undo {
+    width: 59px;
+    height: 68.91px;
+    position: absolute;
+    left: 23px;
+    top: 371px;
+    cursor: pointer;
+}
+/*遊戲資訊(Logo、時間、移動次數)*/
+#gameInfo {
+    height: 120px;
+}
+#gameInfo .logo {
+    width: 237.73px;
+    height: 106.33px;
+    position: absolute;
+    left: 38.85px;
+    top: 0.67px;
+}
+/*卡片放置區(上方)*/
+#cardSpace {
+    height: 158px;
+    padding-left: 60px;
+}
+.space, .scoreArea {
+    box-sizing: border-box;
+    width: 110px;
+    height: 158px;
+    border: 1px #FFF solid;
+    border-radius: 5px;
+    float: left;
+    margin-right: 25px;
+    margin-bottom: 47px;
+}
+/*左上方自由放置區*/
+.space {
+    outline: 1px #FFF solid;
+    outline-offset: -6px;
+}
+/*右上方得分區*/
+.scoreArea {
+    line-height: 158px;
+    font-size: 75px;
+    font-weight: 900;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+}
+/*卡片堆疊區(下方)*/
+#cardFolder {
+    height: 522px;
+    padding-left: 60px;
+}
+.cardColumn {
+    width: 110px;
+    min-height: 400px;
+    margin-right: 25px;
+    float: left;
+    background: red;
+}
+.cardColumn div:nth-child(1){
+    top: 325px;
+}
+.cardColumn div:nth-child(2){
+    top: 369px;
+}
+.cardColumn div:nth-child(3){
+    top: 413px;
+}
+.cardColumn div:nth-child(4){
+    top: 457px;
+}
+.cardColumn div:nth-child(5){
+    top: 501px;
+}
+.cardColumn div:nth-child(6){
+    top: 545px;
+}
+.cardColumn div:nth-child(7){
+    top: 589px;
+}
+.cardColumn div:nth-child(8){
+    top: 633px;
+}
+.cardColumn div:nth-child(9){
+    top: 677px;
+}
+.cardColumn div:nth-child(10){
+    top: 721px;
+}
+.cardColumn div:nth-child(11){
+    top: 765px;
+}
+.cardColumn div:nth-child(12){
+    top: 809px;
+}
+.cardColumn div:nth-child(13){
+    top: 853px;
+}
+/*卡牌*/
+.card {
+    height: 158px;
+    width: 110px;
+    background-size: contain;
+    position: absolute;
+    top: 500px;
+    left: 0px;
+    cursor: pointer;
+    user-select: none;
+}
