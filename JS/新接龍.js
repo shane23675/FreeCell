@@ -37,7 +37,11 @@
         ml: "margin-left",
         mr: "margin-right",
         mt: "margin-top",
-        mb: "margin-bottom"
+        mb: "margin-bottom",
+        l: "left",
+        r: "right",
+        t: "top",
+        b: "bottom"
     };
     // 2. 批量製造如下函數：
     //function $gh(str) {
@@ -61,8 +65,9 @@
             $t.css("z-index", "100");
             //取得當前滑鼠offset值(在移動中必須固定)
             var mouseOffset = [event.offsetX, event.offsetY];
-            //先定義left及top，在放開滑鼠時的事件會用到
-            var left, top;
+            //先定義left及top，在放開滑鼠時的事件會用到，並且先賦值為當前的left及top值，以免後面while判斷式進入undefined的死循環
+            var left = $gl($t);
+            var top = $gt($t);
             //在main中進行移動
             $p.on("mousemove", function (event) {
                 //移動目標

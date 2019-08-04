@@ -100,7 +100,6 @@ aside .undo {
     min-height: 400px;
     margin-right: 25px;
     float: left;
-    background: red;
 }
 .cardColumn div:nth-child(1){
     top: 325px;
