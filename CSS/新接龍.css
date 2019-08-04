@@ -101,6 +101,30 @@ aside .undo {
     margin-right: 25px;
     float: left;
 }
+div.cardColumn:nth-child(1) > .card {
+    left: 60px;
+}
+div.cardColumn:nth-child(2) > .card {
+    left: 195px;
+}
+div.cardColumn:nth-child(3) > .card {
+    left: 330px;
+}
+div.cardColumn:nth-child(4) > .card {
+    left: 465px;
+}
+div.cardColumn:nth-child(5) > .card {
+    left: 600px;
+}
+div.cardColumn:nth-child(6) > .card {
+    left: 735px;
+}
+div.cardColumn:nth-child(7) > .card {
+    left: 870px;
+}
+div.cardColumn:nth-child(8) > .card {
+    left: 1005px;
+}
 .cardColumn div:nth-child(1){
     top: 325px;
 }

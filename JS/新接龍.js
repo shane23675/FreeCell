@@ -10,21 +10,43 @@
         } else {
             this.color = "black";
         };
-        //創建一個對應的DOM元素
-        $("#playArea").append('<div class="card" id="' + this.id + '" style="background-image: url(images/52cards/' + this.id + '.png)"></div>');
-        //此物件的elem屬性指向該DOM元素
-        this.elem = $("#" + this.id);
-        //將dragElement函數套用於該DOM元素上
-        dragElement(this.elem);
+        ////創建一個對應的DOM元素
+        //$("#playArea").append('<div class="card" id="' + this.id + '" style="background-image: url(images/52cards/' + this.id + '.png)"></div>');
+        ////此物件的elem屬性指向對應的DOM元素
+        //this.elem = $("#" + this.id);
+        ////將dragElement函數套用於該DOM元素上
+        //dragElement(this.elem);
     };
     //創建club1 ~ spade13 代表各張撲克牌
     var suitArray = ["club", "diamond", "heart", "spade"];
+    //用cardArray來裝填所有的Card物件
+    var cardArray = [];
     suitArray.forEach(function (item) {
         for (var i = 1; i <= 13; i++) {
             var str = ("window." + item + "_" + i + "= new Card('" + item + "'," + i + ");");
             eval(str);
+            var str2 = "cardArray.push(" + item + "_" + i + ")";
+            eval(str2);
         }
     });
+    //開局時隨機發牌的函數
+    (function () {
+        for (var i = 0; i < 52; i++) {
+            //從cardArray中隨機選一張牌
+            c(cardArray.length);
+            var randInt = parseInt(Math.random() * cardArray.length) //0~51
+            //將牌「抽出來」(起始值, 去除數量) **注意：splice函數會將該item真的從cardArray中移除並返回一個只有該item的Array，所以是真的「抽出來」
+            var selectedCard = cardArray.splice(randInt, 1)[0];
+            c(selectedCard);
+            //將抽出的牌依序放入cardColumn中
+            var j = i % 8;
+            $(".cardColumn").eq(j).append('<div class="card" id="' + selectedCard.id + '" style="background-image: url(images/52cards/' + selectedCard.id + '.png)"></div>');
+            //此卡牌的elem屬性指向剛創建的DOM元素
+            selectedCard.elem = $("#" + selectedCard.id);
+            //將dragElement函數套用於此DOM元素上
+            dragElement(selectedCard.elem);
+        };
+    })();
     //用以獲得元素CSS相關數值的函數(返回整數值)
     // 1. 創造一個函數產生器對象
     var functionGenerator = {
@@ -61,7 +83,7 @@
         var $cf = $("#cardFolder");
         //在目標上按下滑鼠左鍵
         $t.mousedown(function (event) {
-            //移動開始，將target的z-index調到最大
+            //移動開始，將target的z-index調到最大，才不會被其他卡牌遮住
             $t.css("z-index", "100");
             //取得當前滑鼠offset值(在移動中必須固定)
             var mouseOffset = [event.offsetX, event.offsetY];
@@ -86,7 +108,6 @@
                 } else if (top >= maxTop) {
                     top = maxTop;
                 };
-                //移動中為了避免top值被cardColumn的屬性給限制，因此加上!important
                 $t.css("left", left + "px").css("top", top + "px");
             });
             //在window中放開滑鼠
@@ -151,7 +172,8 @@
                     //重新幫$tClone綁定dragElement
                     dragElement($tClone);
                 }
-
+                //移除$tClone的動畫過渡
+                $tClone.css("transition", "");
                 //移除main的mousemove事件
                 $p.off("mousemove");
                 //移除window的mouseup事件
@@ -162,9 +184,16 @@
     //放置目標元素時檢測規則的函數
     function placeCard() {
 
-    }
-
-
+    };
+    //將card在DOM樹中移動的函數
+    function moveCardDiv($t, newPlace) {
+        //將目標card元素刪除，新製造一個複製品放到目標位置
+        var $tClone = $t.clone(false);
+        $t.remove();
+        $(newPlace).append($tClone);
+        //重新幫$tClone綁定dragElement
+        dragElement($tClone);
+    };
 
 
 
