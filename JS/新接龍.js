@@ -33,11 +33,9 @@
     (function () {
         for (var i = 0; i < 52; i++) {
             //從cardArray中隨機選一張牌
-            c(cardArray.length);
             var randInt = parseInt(Math.random() * cardArray.length) //0~51
             //將牌「抽出來」(起始值, 去除數量) **注意：splice函數會將該item真的從cardArray中移除並返回一個只有該item的Array，所以是真的「抽出來」
             var selectedCard = cardArray.splice(randInt, 1)[0];
-            c(selectedCard);
             //將抽出的牌依序放入cardColumn中
             var j = i % 8;
             $(".cardColumn").eq(j).append('<div class="card" id="' + selectedCard.id + '" style="background-image: url(images/52cards/' + selectedCard.id + '.png)"></div>');
@@ -150,30 +148,18 @@
                 * 高於此則置於cardFolder
                 * 且進一步做更複雜的判斷
                 */
+                //將$t的top值清空才能吃到space的預設值
+                $t.css("top", "");
+                //此時若count == 0 表示目標位置為第一欄， count == 1 表示目標位置為第二欄...
                 if (top + $gh($t) / 2 <= $gh("#gameInfo") + $gh("#cardSpace")) {
-                    //top變成gameInfo的高度即可置於cardSpace中
-                    top = $gh("#gameInfo");
-                    //將target元素刪除，新製造一個複製品放到playArea(等於從cardFolder中移至playArea)
-                    var $tClone = $t.clone(false);
-                    $t.remove();
-                    $p.append($tClone);
-                    //重新幫$tClone綁定dragElement
-                    dragElement($tClone);
-                    //將該複製品的高度進行調整
-                    $tClone.css("top", top + "px");
+                    //移動至cardSpace中的某欄
+                    var newPlace = $("#cardSpace>div:nth-child(" + (count + 1) + ")");
                 } else {
-                    //若卡牌的中心點Y座標低於gameInfo + cardSpace的高度，表示應該移到cardColumn中，需先將top值刪除，才能吃到css表中的預設值
-                    $t.css("top", "");
-                    //將target元素刪除，新製造一個複製品放到目標cardColumn(等於從playArea中移至目標cardColumn)
-                    var $tClone = $t.clone(false);
-                    $t.remove();
-                    //此時若count == 0 表示目標位置為第一欄， count == 1 表示目標位置為第二欄...
-                    $cf.find("div.cardColumn:nth-child(" + (count + 1) + ")").append($tClone);
-                    //重新幫$tClone綁定dragElement
-                    dragElement($tClone);
+                    //移動至cardColumn中的某欄
+                    var newPlace = $cf.find("div.cardColumn:nth-child(" + (count + 1) + ")");
                 }
-                //移除$tClone的動畫過渡
-                $tClone.css("transition", "");
+                //調用card移動函數
+                moveCardDiv($t, newPlace);
                 //移除main的mousemove事件
                 $p.off("mousemove");
                 //移除window的mouseup事件

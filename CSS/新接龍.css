@@ -82,6 +82,9 @@ aside .undo {
     outline: 1px #FFF solid;
     outline-offset: -6px;
 }
+.space div.card {
+    top: 120px;
+}
 /*右上方得分區*/
 .scoreArea {
     line-height: 158px;
@@ -89,6 +92,9 @@ aside .undo {
     font-weight: 900;
     text-align: center;
     color: rgba(255, 255, 255, 0.5);
+}
+.scoreArea div.card {
+    top: 120px;
 }
 /*卡片堆疊區(下方)*/
 #cardFolder {
