@@ -75,13 +75,16 @@
         var $cf = $("#cardFolder");
         //在目標上按下滑鼠左鍵
         $t.mousedown(function (event) {
-			//檢查是否符合移動規則，不符合則強制退出
-			if (!takeCardCheck($t)){
+			//檢查是否符合移動規則，不符合則強制退出，並用ccardCount記錄移動張數
+			var cardCount = takeCardCheck($t);
+			if (!cardCount){
 				alert("無法移動這張卡牌");
 				return
 			};
-            //移動開始，將target的z-index調到最大，才不會被其他卡牌遮住
-            $t.css("z-index", "100");
+            //移動開始，將目標及其下方卡牌的z-index調到最大，才不會被其他卡牌遮住
+            changeCards($t, cardCount, function(card, i){
+				card.css("z-index", 100);
+			});
             //取得當前滑鼠offset值(在移動中必須固定)
             var mouseOffset = [event.offsetX, event.offsetY];
             //先定義left及top，在放開滑鼠時的事件會用到，並且先賦值為當前的left及top值，以免後面while判斷式進入undefined的死循環
@@ -105,22 +108,27 @@
                 } else if (top >= maxTop) {
                     top = maxTop;
                 };
-                $t.css("left", left + "px").css("top", top + "px");
+				//改變目標及目標下方卡牌位置
+				changeCards($t, cardCount, function(card, i){
+					card.css("left", left + "px").css("top", top + (44 * i) + "px");
+				});
             });
             //在window中放開滑鼠
             $(window).on("mouseup", function () {
-                //完成移動，先將target的z-index恢復原狀
-                $t.css("z-index", "");
+                //完成移動，先將目標及其下方卡牌的z-index恢復原狀
+                changeCards($t, cardCount, function(card, i){
+					card.css("z-index", "");
+				});
                 /* 調整目標的X座標：
                  * 以標準狀況來說的分界線是在60+110+(25/2), +110+25, +...
                  * 是用left+55 去對(目標卡牌的中心點X座標)
                  * 也就是若left+55 < 60+110+(25/2)為第一排, left+25 < 60+110+(25/2) + (110+25)*1 為第二排
                  * 全部用對應的變數去換則是：
-                 * left+parseInt($col.css("width"))/2 < parseInt($cf.css("padding-left")) + parseInt($col.css("width")) + parseInt($col.css("margin-right"))/2
-                 * 間隔為parseInt($col.css("width")) + parseInt($col.css("margin-right"))
+                 * left+ $gw($col)/2 < $gpl($cf) + $gw($col) + $gml($col)/2
+                 * 間隔為$gw($col) + $gmr($col)
                  * 移項過後變成：
-                 * left < parseInt($cf.css("padding-left")) + (parseInt($col.css("width")) + parseInt($col.css("margin-right")))/2
-                 * 間隔為parseInt($col.css("width")) + parseInt($col.css("margin-right"))
+                 * left < $gpl($cf) + ($gw($col) + $gmr($col))/2
+                 * 間隔為$gw($col) + $gmr($col)
                  * 所以寫一個迴圈來判斷
                  * threshold: 閾值，也就是區分卡牌要放到第幾排的分界值
                  * interval: 間隔，每個閾值之間的間隔
@@ -134,7 +142,9 @@
                     if (left < threshold) {
                         //left小於閾值時，left值應為60+135*count才能對齊
                         left = $gpl($cf) + interval * count;
-                        $t.css("left", left + "px");
+                        changeCards($t, cardCount, function(card, i){
+							card.css("left", left);
+						});
                         break;
                     } else {
                         threshold += interval;
@@ -147,8 +157,10 @@
                 * 高於此則置於cardFolder
                 * 且進一步做更複雜的判斷
                 */
-                //將$t的top值清空才能吃到space的預設值
-                $t.css("top", "");
+                //將目標的top值清空才能吃到space的預設值
+                changeCards($t, cardCount, function(card, i){
+					card.css("top", "");
+				});
                 //此時若count == 0 表示目標位置為第一欄， count == 1 表示目標位置為第二欄...
                 if (top + $gh($t) / 2 <= $gh("#gameInfo") + $gh("#cardSpace")) {
                     //移動至cardSpace中的某欄
@@ -157,8 +169,11 @@
                     //移動至cardColumn中的某欄
                     var newPlace = $cf.find("div.cardColumn:nth-child(" + (count + 1) + ")");
                 }
-                //調用card移動函數
-                moveCardDiv($t, newPlace);
+                //調用card移動函數將目標及其下方卡牌移至新位置
+				changeCards($t, cardCount, function(card, i){
+					moveCardDiv(card, newPlace);
+				});
+                //moveCardDiv($t, newPlace);
                 //移除main的mousemove事件
                 $p.off("mousemove");
                 //移除window的mouseup事件
@@ -180,11 +195,11 @@
         //重新幫$tClone綁定dragElement
         dragElement($tClone);
     };
-	//拿取目標元素時檢測規則的函數
-	function takeCardCheck($t){
-		//目標後面沒有任何card，可以移動
+	//拿取目標元素時檢測規則的函數(count記錄目標本身加上下方總共有幾張卡)
+	function takeCardCheck($t, count=1){
+		//目標後面沒有任何card，可以移動並返回總張數
 		if ($t.next().length == 0){
-			return true
+			return count
 		}
 		//目標後面有card，進行判斷
 		else{
@@ -197,12 +212,31 @@
 			//比較兩張卡牌的顏色和數字是否符合規則
 			if (card$t.color != card$tNext.color && card$t.num - 1 == card$tNext.num){
 				//符合規則，繼續往下檢查
-				return takeCardCheck($t.next())
+				count++;
+				return takeCardCheck($t.next(), count)
 			}else{
 				return false
 			};
 		};
 	};
+	//改變目標卡牌本身以及下方所有卡牌的函數
+	function changeCards($t, cardCount, func){
+		for (var i=0; i<cardCount; i++){
+			//先將錨點cur指向$t.next()，以免在進行像是moveCard這樣會刪除元素的操作時找不到next()
+			var cur = $t.next();
+			//將$t及i丟入func中執行
+			func($t, i);
+			//$t指向其原先next()物件
+			$t = cur;
+		};
+	};
+	
+	
+	
+	
+	
+	
+	
 	$("button").click(function(){
 		c(takeCardCheck(club_13.elem));
 	});
