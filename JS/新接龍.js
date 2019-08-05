@@ -10,12 +10,6 @@
         } else {
             this.color = "black";
         };
-        ////創建一個對應的DOM元素
-        //$("#playArea").append('<div class="card" id="' + this.id + '" style="background-image: url(images/52cards/' + this.id + '.png)"></div>');
-        ////此物件的elem屬性指向對應的DOM元素
-        //this.elem = $("#" + this.id);
-        ////將dragElement函數套用於該DOM元素上
-        //dragElement(this.elem);
     };
     //創建club1 ~ spade13 代表各張撲克牌
     var suitArray = ["club", "diamond", "heart", "spade"];
@@ -81,6 +75,11 @@
         var $cf = $("#cardFolder");
         //在目標上按下滑鼠左鍵
         $t.mousedown(function (event) {
+			//檢查是否符合移動規則，不符合則強制退出
+			if (!takeCardCheck($t)){
+				alert("無法移動這張卡牌");
+				return
+			};
             //移動開始，將target的z-index調到最大，才不會被其他卡牌遮住
             $t.css("z-index", "100");
             //取得當前滑鼠offset值(在移動中必須固定)
@@ -167,20 +166,50 @@
             });
         })
     }
-    //放置目標元素時檢測規則的函數
-    function placeCard() {
-
-    };
     //將card在DOM樹中移動的函數
     function moveCardDiv($t, newPlace) {
-        //將目標card元素刪除，新製造一個複製品放到目標位置
+        //新製造一個複製品
         var $tClone = $t.clone(false);
+		//此對應卡牌的elem屬性指向這個複製品
+		var card$t = eval($t.attr("id"));
+        card$t.elem = $tClone;
+		//將原目標刪除
         $t.remove();
+		//將複製品移至目標位置
         $(newPlace).append($tClone);
         //重新幫$tClone綁定dragElement
         dragElement($tClone);
     };
+	//拿取目標元素時檢測規則的函數
+	function takeCardCheck($t){
+		//目標後面沒有任何card，可以移動
+		if ($t.next().length == 0){
+			return true
+		}
+		//目標後面有card，進行判斷
+		else{
+			//取得目標的id字串
+			var id = $t.attr("id");
+			//取得該id對應的card物件
+			var card$t = eval(id);
+			//取得下一張卡牌的card物件
+			var card$tNext = eval($t.next().attr("id"));
+			//比較兩張卡牌的顏色和數字是否符合規則
+			if (card$t.color != card$tNext.color && card$t.num - 1 == card$tNext.num){
+				//符合規則，繼續往下檢查
+				return takeCardCheck($t.next())
+			}else{
+				return false
+			};
+		};
+	};
+	$("button").click(function(){
+		c(takeCardCheck(club_13.elem));
+	});
+    //放置目標元素時檢測規則的函數
+    function placeCardCheck() {
 
-
+    };
+	
 
 };
