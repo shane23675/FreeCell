@@ -53,7 +53,7 @@ aside .undo {
     opacity: 0.25;
     transition: all 0.5s;
 }
-/*遊戲資訊(Logo、時間、移動次數)*/
+/*遊戲資訊(Logo、警告訊息、時間、移動次數)*/
 #gameInfo {
     height: 120px;
     font-size: 27px;
@@ -69,6 +69,16 @@ aside .undo {
     position: absolute;
     left: 38.85px;
     top: 0.67px;
+}
+#warning {
+    position: absolute;
+    height: 50px;
+    width: 600px;
+    left: 300px;
+    top: 43px;
+    text-align: left;
+    font-size: 20px;
+    color: #ff8080;
 }
 #time {
     position: absolute;

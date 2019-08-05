@@ -1,5 +1,7 @@
 ﻿window.onload = function () {
     var c = console.log;
+    //用start紀錄是否已經開始
+    var start = false;
     //定義一個 Card類
     function Card(suit, num) {
         //suit: 花色, num: 數字, id: 對應的DOM的id, color: 顏色
@@ -46,6 +48,7 @@
             } else {
                 //發牌完成，遊戲開始計時
                 timeStart();
+                start = true;
             };
         };
         setTimeout(function () { initialization(i); }, interval);
@@ -86,14 +89,23 @@
         var $cf = $("#cardFolder");
         //在目標上按下滑鼠左鍵
         $t.mousedown(function (event) {
+            //若遊戲尚未開始(初始化尚未完成)，則無法移動卡牌
+            if (!start) { return };
 			//檢查是否符合移動規則，不符合則強制退出，並用cardCount記錄移動張數
 			var cardCount = takeCardCheck($t);
             if (cardCount == "overtake") {
-                alert("目前最多只能同時移動" + maxTakeCheck() + "張卡牌");
+                $("#warning").text("Foul: Now you can only move " + maxTakeCheck() + " cards at once");
+                //將目標變透明
+                $t.css("opacity", 0.25);
                 return
             } else if (cardCount == "foul") {
-                alert("無法移動這張卡牌");
+                $("#warning").text("Foul: Can NOT move this card now -- " + $t.attr("id"));
+                //將目標變透明
+                $t.css("opacity", 0.25);
                 return
+            } else {
+                //無違規移動情形，將警告文字刪除
+                $("#warning").text("");
             }
             //移動開始，將目標及其下方卡牌的z-index調到最大，才不會被其他卡牌遮住
             changeCards($t, cardCount, function(card, i){
@@ -199,9 +211,17 @@
                 $p.off("mousemove");
                 //移除window的mouseup事件
                 $(window).off("mouseup");
+                //保留window消除透明卡牌的mouseup事件
+                $(window).on("mouseup", function () {
+                    $(".card").css("opacity", "");
+                });
             });
         })
     }
+    //滑鼠放開後，所有卡牌都變為不透明(消除違規移動時的卡牌透明化效果)
+    $(window).on("mouseup", function () {
+        $(".card").css("opacity", "");
+    });
     //將card在DOM樹中移動的函數
     //用moves來記錄移動次數
     var moves = 0;
