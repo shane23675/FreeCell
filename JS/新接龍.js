@@ -2,6 +2,7 @@
     var c = console.log;
     //定義一個 Card類
     function Card(suit, num) {
+        //suit: 花色, num: 數字, id: 對應的DOM的id, color: 顏色
         this.suit = suit;
         this.num = num;
         this.id = suit + "_" + num;
@@ -164,16 +165,23 @@
                 //此時若count == 0 表示目標位置為第一欄， count == 1 表示目標位置為第二欄...
                 if (top + $gh($t) / 2 <= $gh("#gameInfo") + $gh("#cardSpace")) {
                     //移動至cardSpace中的某欄
-                    var newPlace = $("#cardSpace>div:nth-child(" + (count + 1) + ")");
+                    var $newPlace = $("#cardSpace>div:nth-child(" + (count + 1) + ")");
                 } else {
                     //移動至cardColumn中的某欄
-                    var newPlace = $cf.find("div.cardColumn:nth-child(" + (count + 1) + ")");
-                }
-                //調用card移動函數將目標及其下方卡牌移至新位置
-				changeCards($t, cardCount, function(card, i){
-					moveCardDiv(card, newPlace);
-				});
-                //moveCardDiv($t, newPlace);
+                    var $newPlace = $cf.find("div.cardColumn:nth-child(" + (count + 1) + ")");
+                };
+                //檢查此放置行動是否符合規則
+                if (!placeCardCheck($t, $newPlace, cardCount)) {
+                    //不符合規則，將所有卡牌的top及left值清除使其回到原來位置
+                    changeCards($t, cardCount, function (card, i) {
+                        card.css("top", "").css("left", "");
+                    });
+                } else {
+                    //符合規則，調用card移動函數將目標及其下方卡牌移至新位置
+                    changeCards($t, cardCount, function (card, i) {
+                        moveCardDiv(card, $newPlace);
+                    });
+                };
                 //移除main的mousemove事件
                 $p.off("mousemove");
                 //移除window的mouseup事件
@@ -182,7 +190,7 @@
         })
     }
     //將card在DOM樹中移動的函數
-    function moveCardDiv($t, newPlace) {
+    function moveCardDiv($t, $newPlace) {
         //新製造一個複製品
         var $tClone = $t.clone(false);
 		//此對應卡牌的elem屬性指向這個複製品
@@ -191,11 +199,11 @@
 		//將原目標刪除
         $t.remove();
 		//將複製品移至目標位置
-        $(newPlace).append($tClone);
+        $newPlace.append($tClone);
         //重新幫$tClone綁定dragElement
         dragElement($tClone);
     };
-	//拿取目標元素時檢測規則的函數(count記錄目標本身加上下方總共有幾張卡)
+	//拿取目標元素時檢測規則的函數(count記錄總共拿幾張卡)
 	function takeCardCheck($t, count=1){
 		//目標後面沒有任何card，可以移動並返回總張數
 		if ($t.next().length == 0){
@@ -230,20 +238,66 @@
 			$t = cur;
 		};
 	};
-	
-	
-	
-	
-	
-	
-	
-	$("button").click(function(){
-		c(takeCardCheck(club_13.elem));
-	});
     //放置目標元素時檢測規則的函數
-    function placeCardCheck() {
+    function placeCardCheck($t, $newPlace, cardCount) {
+        //透過$newPlace的class值來判斷是放到哪種區塊
+        var p = $newPlace.attr("class");
+        //獲取新位置最後一張卡的card對象
+        var cardLast = eval($newPlace.find("div.card:last-child").attr("id"));
+        //獲取$t的card對象
+        var card$t = eval($t.attr("id"));
 
+        //若放到cardColumn
+        if (p == "cardColumn") {
+            //如果新位置沒有任何卡(cardLast == undefined)，返回true
+            if (!cardLast) { return true };
+            //進行規則檢查
+            if (cardLast.color != card$t.color && cardLast.num - card$t.num == 1) {
+                return true
+            } else {
+                return false
+            };
+        }
+        //若放到左上方space
+        else if (p == "space") {
+            //判斷是否拿了一張以上的卡片，如果有，返回false
+            if (cardCount > 1) { return false };
+            //判斷裡面是否有任何卡片
+            if ($newPlace.find(".card").length) {
+                //有卡片，返回false
+                return false
+            } else {
+                return true
+            }
+        }
+        //若放到右上方scoreArea
+        else {
+            //判斷是否拿了一張以上的卡片，如果有，返回false
+            if (cardCount > 1) { return false };
+            //如果新位置沒有任何卡(cardLast == undefined)，則只能放入A
+            if (!cardLast) {
+                if (card$t.num == 1) {
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                //有卡牌，進行規則檢查
+                if (cardLast.suit == card$t.suit && cardLast.num == card$t.num - 1 ) {
+                    return true
+                } else {
+                    return false
+                };
+            };
+        }
     };
-	
+
+
+
+
+
+    //測試用按鈕
+    $("button").click(function () {
+    });
 
 };
