@@ -12,7 +12,7 @@ main {
 #playArea {
     position: relative;
     width: 1175px;
-    height: 800px;
+    height: 1100px;
     background: -webkit-linear-gradient(270deg, #525252, #001F1D);
     background: -moz-linear-gradient(180deg, #525252, #001F1D);
     background: -o-linear-gradient(180deg, #525252, #001F1D);
@@ -23,7 +23,7 @@ main {
 aside {
     position: relative;
     width: 105px;
-    height: 800px;
+    height: 1100px;
     float: left;
     background: #001F1D;
 }
@@ -50,10 +50,18 @@ aside .undo {
     left: 23px;
     top: 371px;
     cursor: pointer;
+    opacity: 0.25;
+    transition: all 0.5s;
 }
 /*遊戲資訊(Logo、時間、移動次數)*/
 #gameInfo {
     height: 120px;
+    font-size: 27px;
+    font-weight: 700;
+    color: white;
+    text-align: right;
+    line-height: 50px;
+    overflow: hidden;
 }
 #gameInfo .logo {
     width: 237.73px;
@@ -61,6 +69,21 @@ aside .undo {
     position: absolute;
     left: 38.85px;
     top: 0.67px;
+}
+#time {
+    position: absolute;
+    width: 180px;
+    height: 50px;
+    background: url(../images/others/time.png) no-repeat 75px 9px;
+    right: 240px;
+    top: 40px;
+}
+#moves {
+    position: absolute;
+    width: 180px;
+    height: 50px;
+    right: 60px;
+    top: 40px;
 }
 /*卡片放置區(上方)*/
 #cardSpace {

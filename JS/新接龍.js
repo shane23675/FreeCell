@@ -26,7 +26,9 @@
     });
     //開局時隨機發牌的函數
     (function () {
-        for (var i = 0; i < 52; i++) {
+        var i = 0;
+        var interval = 50;
+        function initialization(i) {
             //從cardArray中隨機選一張牌
             var randInt = parseInt(Math.random() * cardArray.length) //0~51
             //將牌「抽出來」(起始值, 去除數量) **注意：splice函數會將該item真的從cardArray中移除並返回一個只有該item的Array，所以是真的「抽出來」
@@ -38,7 +40,15 @@
             selectedCard.elem = $("#" + selectedCard.id);
             //將dragElement函數套用於此DOM元素上
             dragElement(selectedCard.elem);
+            //回調自身(i==51時，已經走了52次，此時停止遞迴呼叫)
+            if (i < 51) {
+                setTimeout(function () { initialization(i + 1); }, interval);
+            } else {
+                //發牌完成，遊戲開始計時
+                timeStart();
+            };
         };
+        setTimeout(function () { initialization(i); }, interval);
     })();
     //用以獲得元素CSS相關數值的函數(返回整數值)
     // 1. 創造一個函數產生器對象
@@ -76,12 +86,15 @@
         var $cf = $("#cardFolder");
         //在目標上按下滑鼠左鍵
         $t.mousedown(function (event) {
-			//檢查是否符合移動規則，不符合則強制退出，並用ccardCount記錄移動張數
+			//檢查是否符合移動規則，不符合則強制退出，並用cardCount記錄移動張數
 			var cardCount = takeCardCheck($t);
-			if (!cardCount){
-				alert("無法移動這張卡牌");
-				return
-			};
+            if (cardCount == "overtake") {
+                alert("目前最多只能同時移動" + maxTakeCheck() + "張卡牌");
+                return
+            } else if (cardCount == "foul") {
+                alert("無法移動這張卡牌");
+                return
+            }
             //移動開始，將目標及其下方卡牌的z-index調到最大，才不會被其他卡牌遮住
             changeCards($t, cardCount, function(card, i){
 				card.css("z-index", 100);
@@ -190,6 +203,8 @@
         })
     }
     //將card在DOM樹中移動的函數
+    //用moves來記錄移動次數
+    var moves = 0;
     function moveCardDiv($t, $newPlace) {
         //新製造一個複製品
         var $tClone = $t.clone(false);
@@ -202,9 +217,21 @@
         $newPlace.append($tClone);
         //重新幫$tClone綁定dragElement
         dragElement($tClone);
+        //增加移動次數記錄
+        moves++;
+        $("#moves").text(moves + " Moves");
+        //若moves == 1，則啟用undo功能
+        if (moves == 1) {
+            $(".undo").css("opacity", 1);
+        } else if (moves == 0) {
+            $(".undo").css("opacity", "");
+        }
+        
     };
 	//拿取目標元素時檢測規則的函數(count記錄總共拿幾張卡)
-	function takeCardCheck($t, count=1){
+    function takeCardCheck($t, count = 1) {
+        //每一圈都檢查是否超過最大可拿取數量，如果超過就返回"overtake"
+        if (count > maxTakeCheck()) { return "overtake" };
 		//目標後面沒有任何card，可以移動並返回總張數
 		if ($t.next().length == 0){
 			return count
@@ -222,8 +249,9 @@
 				//符合規則，繼續往下檢查
 				count++;
 				return takeCardCheck($t.next(), count)
-			}else{
-				return false
+            } else {
+                //犯規，返回"foul"
+				return "foul"
 			};
 		};
 	};
@@ -255,6 +283,7 @@
             if (cardLast.color != card$t.color && cardLast.num - card$t.num == 1) {
                 return true
             } else {
+                //測試時將這裡修改為true就可以隨意移動卡牌
                 return false
             };
         }
@@ -291,13 +320,41 @@
             };
         }
     };
-
-
+    //檢查目前最大可拿取數量的函數
+    function maxTakeCheck() {
+        //找出所有為空的space元素
+        var emptySpace = $(".space:empty").length;
+        //找出所有為空的cardColumn元素
+        var emptyCardColumn = $(".cardColumn:empty").length;
+        //返回最大可拿取數量
+        return (emptySpace + 1) * (emptyCardColumn + 1)
+    };
+    //開始計算時間的函數
+    function timeStart() {
+        var sec = 0;
+        var min = 0;
+        var gameTimer = setInterval(function () {
+            //每一秒sec增加1
+            sec++;
+            if (sec == 60) {
+                min++;
+                sec = 0;
+            };
+            //將時間格式化成01:09這樣的形式
+            var formattedTime = (min < 10 ? "0" + min : "" + min) + ":" + (sec < 10 ? "0" + sec : "" + sec);
+            $("#time").text(formattedTime);
+        }, 1000);
+        //給window添加一個停止計時器的方法
+        window.stopGameTimer = function () {
+            clearInterval(gameTimer);
+        };
+    };
 
 
 
     //測試用按鈕
     $("button").click(function () {
+        c(maxTakeCheck());
     });
 
 };
