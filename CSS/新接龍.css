@@ -222,7 +222,7 @@ div.cardColumn:nth-child(8) > .card {
     left: 0px;
     cursor: pointer;
     user-select: none;
-	transition: transform 0.4s;
+	transition: all 0.4s;
 }
 .card:hover {
 	transform: translateY(-10px);

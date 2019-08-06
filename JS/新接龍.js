@@ -6,6 +6,8 @@
     var moves = 0;
 	//用saveArray儲存這局的原始卡牌位置
 	var saveArray = [];
+	//定義一個變量讓被拿取卡牌的z-index越來越大，能夠覆蓋其他卡牌
+	var zIndex = 1;
     //定義一個 Card類
     function Card(suit, num) {
         //suit: 花色, num: 數字, id: 對應的DOM的id, color: 顏色
@@ -122,9 +124,9 @@
                 //無違規移動情形，將警告文字刪除
                 $("#warning").text("");
             }
-            //移動開始，將目標及其下方卡牌的z-index調到最大，才不會被其他卡牌遮住
+            //移動開始，將目標及其下方卡牌的z-index調到最大，才不會被其他卡牌遮住，同時消除transition以免移動卡頓
             changeCards($t, cardCount, function(card, i){
-				card.css("z-index", 100);
+				card.css("z-index", zIndex++).css("transition", "none");
 			});
             //取得當前滑鼠offset值(在移動中必須固定)
             var mouseOffset = [event.offsetX, event.offsetY];
@@ -156,9 +158,9 @@
             });
             //在window中放開滑鼠
             $(window).on("mouseup", function () {
-                //完成移動，先將目標及其下方卡牌的z-index恢復原狀
+                //完成移動，先將目標及其下方卡牌的transition恢復原狀
                 changeCards($t, cardCount, function(card, i){
-					card.css("z-index", "");
+					card.css("transition", "");
 				});
                 /* 調整目標的X座標：
                  * 以標準狀況來說的分界線是在60+110+(25/2), +110+25, +...
@@ -238,6 +240,8 @@
     });
 	//移動次數改變時刷新相關資訊的函數
 	function movesRefresh(){
+		//若遊戲尚未開始則無法調用
+		if (!start){return};
 		//改變右上方記錄的Moves次數
         $("#moves").text(moves + " Moves");
         //若moves == 1，則啟用undo功能
@@ -416,6 +420,11 @@
 	});
 	//點擊「重新開始」
 	$(".restart").click(function(){
+		//移動次數重置
+		moves = 0;
+		movesRefresh();
+		//改變start狀態
+		start = false;
 		//計時器重置
 		resetGameTimer();
         var i = 0;
@@ -432,7 +441,7 @@
             if (i < 51) {
                 setTimeout(function () { restart(i + 1); }, interval);
             } else {
-                //發牌完成，遊戲開始計時
+                //重新發牌完成，遊戲開始計時
                 timeStart();
                 start = true;
 				//刪除初始化使用的定時器
