@@ -140,39 +140,6 @@ aside .undo {
     margin-right: 25px;
     float: left;
 }
-/*每一欄(直行)的預設left值*/
-#cardSpace > div:nth-child(1) .card,
-div.cardColumn:nth-child(1) > .card {
-    left: 60px;
-}
-#cardSpace > div:nth-child(2) .card,
-div.cardColumn:nth-child(2) > .card {
-    left: 195px;
-}
-#cardSpace > div:nth-child(3) .card,
-div.cardColumn:nth-child(3) > .card {
-    left: 330px;
-}
-#cardSpace > div:nth-child(4) .card,
-div.cardColumn:nth-child(4) > .card {
-    left: 465px;
-}
-#cardSpace > div:nth-child(5) .card,
-div.cardColumn:nth-child(5) > .card {
-    left: 600px;
-}
-#cardSpace > div:nth-child(6) .card,
-div.cardColumn:nth-child(6) > .card {
-    left: 735px;
-}
-#cardSpace > div:nth-child(7) .card,
-div.cardColumn:nth-child(7) > .card {
-    left: 870px;
-}
-#cardSpace > div:nth-child(8) .card,
-div.cardColumn:nth-child(8) > .card {
-    left: 1005px;
-}
 .cardColumn div:nth-child(1){
     top: 325px;
 }
@@ -212,6 +179,39 @@ div.cardColumn:nth-child(8) > .card {
 .cardColumn div:nth-child(13){
     top: 853px;
 }
+/*每一欄(直行)的預設left值*/
+#cardSpace > div:nth-child(1) .card,
+div.cardColumn:nth-child(1) > .card {
+    left: 60px;
+}
+#cardSpace > div:nth-child(2) .card,
+div.cardColumn:nth-child(2) > .card {
+    left: 195px;
+}
+#cardSpace > div:nth-child(3) .card,
+div.cardColumn:nth-child(3) > .card {
+    left: 330px;
+}
+#cardSpace > div:nth-child(4) .card,
+div.cardColumn:nth-child(4) > .card {
+    left: 465px;
+}
+#cardSpace > div:nth-child(5) .card,
+div.cardColumn:nth-child(5) > .card {
+    left: 600px;
+}
+#cardSpace > div:nth-child(6) .card,
+div.cardColumn:nth-child(6) > .card {
+    left: 735px;
+}
+#cardSpace > div:nth-child(7) .card,
+div.cardColumn:nth-child(7) > .card {
+    left: 870px;
+}
+#cardSpace > div:nth-child(8) .card,
+div.cardColumn:nth-child(8) > .card {
+    left: 1005px;
+}
 /*卡牌*/
 .card {
     height: 158px;
@@ -222,4 +222,17 @@ div.cardColumn:nth-child(8) > .card {
     left: 0px;
     cursor: pointer;
     user-select: none;
+	transition: transform 0.4s;
 }
+.card:hover {
+	transform: translateY(-10px);
+	
+}
+
+
+
+
+
+
+
+
