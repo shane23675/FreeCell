@@ -20,6 +20,10 @@
             this.color = "black";
         };
     };
+    //從DOM元素轉換為對應的Card物件的函數
+    function toCard($t) {
+        return eval($t.attr("id"))
+    };
     //新開一局的函數
     function newGame() {
 		//初始化前先確定start為false，saveArray為空
@@ -218,10 +222,16 @@
 				});
                 //檢查此放置行動是否符合規則
                 if (placeCardCheck($t, $newPlace, cardCount)) {
-                    //若符合規則，調用card移動函數將目標及其下方卡牌移至新位置
+                    //符合規則，先將目標的原來位置做記錄
+                    record($t, cardCount);
+                    //調用card移動函數將目標及其下方卡牌移至新位置
                     changeCards($t, cardCount, function (card, i) {
                         moveCardDiv(card, $newPlace);
                     });
+                    //增加移動次數記錄
+                    moves++;
+                    //刷新移動次數資訊
+                    movesRefresh();
                 };
                 //移除main的mousemove事件
                 $p.off("mousemove");
@@ -257,7 +267,7 @@
         //新製造一個複製品
         var $tClone = $t.clone(false);
 		//此對應卡牌的elem屬性指向這個複製品
-		var card$t = eval($t.attr("id"));
+		var card$t = toCard($t);
         card$t.elem = $tClone;
 		//將原目標刪除
         $t.remove();
@@ -265,10 +275,6 @@
         $newPlace.append($tClone);
         //重新幫$tClone綁定dragElement
         dragElement($tClone);
-        //增加移動次數記錄
-        moves++;
-        //刷新移動次數資訊
-		movesRefresh();
     };
 	//拿取目標元素時檢測規則的函數(count記錄總共拿幾張卡)
     function takeCardCheck($t, count = 1) {
@@ -280,12 +286,10 @@
 		}
 		//目標後面有card，進行判斷
 		else{
-			//取得目標的id字串
-			var id = $t.attr("id");
-			//取得該id對應的card物件
-			var card$t = eval(id);
+			//取得目標對應的card物件
+            var card$t = toCard($t);
 			//取得下一張卡牌的card物件
-			var card$tNext = eval($t.next().attr("id"));
+            var card$tNext = toCard($t.next());
 			//比較兩張卡牌的顏色和數字是否符合規則
 			if (card$t.color != card$tNext.color && card$t.num - 1 == card$tNext.num){
 				//符合規則，繼續往下檢查
@@ -313,9 +317,9 @@
         //透過$newPlace的class值來判斷是放到哪種區塊
         var p = $newPlace.attr("class");
         //獲取新位置最後一張卡的card對象
-        var cardLast = eval($newPlace.find("div.card:last-child").attr("id"));
+        var cardLast = toCard($newPlace.find("div.card:last-child"));
         //獲取$t的card對象
-        var card$t = eval($t.attr("id"));
+        var card$t = toCard($t);
 
         //若放到cardColumn
         if (p == "cardColumn") {
@@ -422,7 +426,10 @@
 	$(".restart").click(function(){
 		//移動次數重置
 		moves = 0;
-		movesRefresh();
+        movesRefresh();
+        //將所有卡牌的z-index重設
+        $(".card").css("z-index", "");
+        zIndex = 1;
 		//改變start狀態
 		start = false;
 		//計時器重置
@@ -445,23 +452,52 @@
                 timeStart();
                 start = true;
 				//刪除初始化使用的定時器
-				clearTimeout(timerRestart);
+                clearTimeout(timerRestart);
             };
         };
         var timerRestart = setTimeout(function () { restart(i); }, interval);
-	});
-	
-
-
-
-
-
-    //測試用按鈕
-    $("#btn1").click(function () {
-        c(saveArray);
     });
-    $("#btn2").click(function () {
-        startGameTimer();
+    //儲存遊戲過程的函數(需傳入移動張數cardCount)
+    var recArray = [];
+    function record($t, cardCount) {
+        //取得目標id字串
+        var idStr = $t.attr("id");
+        //取得目標目前位置
+        var $origin = $t.parent();
+        //將資料存入陣列中
+        recArray.push([idStr, $origin, cardCount])
+    }
+	//按下「undo」
+    $(".undo").click(function () {
+        //若moves為0則返回
+        if (!moves) { return };
+        //取出recArray中最後一筆紀錄
+        var dataArray = recArray.pop();
+        //取得id及原來位置、移動張數
+        var idStr = "#" + dataArray[0];
+        var $origin = dataArray[1];
+        var cardCount = dataArray[2];
+        //移動並增加z-index
+        changeCards($(idStr), cardCount, function ($t, i) {
+            $t.css("z-index", zIndex++);
+            moveCardDiv($t, $origin);
+        });
+        //更新移動次數
+        moves --;
+        movesRefresh();
     });
+
+
+
+
+
+
+    ////測試用按鈕
+    //$("#btn1").click(function () {
+    //    c(toCard($("#club_1")));
+    //});
+    //$("#btn2").click(function () {
+    //    startGameTimer();
+    //});
 
 };
