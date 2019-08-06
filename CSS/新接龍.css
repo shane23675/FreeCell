@@ -4,9 +4,42 @@
     user-select: none;
 }
 main {
+    position: relative;
     overflow: hidden;
     width: 1280px;
     margin: 50px auto;
+}
+/*開場*/
+header {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: -webkit-linear-gradient(270deg, #525252, #001F1D);
+    background: -moz-linear-gradient(180deg, #525252, #001F1D);
+    background: -o-linear-gradient(180deg, #525252, #001F1D);
+    background: linear-gradient(180deg, #525252, #001F1D);
+    z-index: 1;
+}
+#logo {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 646.89px;
+    animation: start 3s alternate;
+    animation-iteration-count: 2;
+    opacity: 0;
+}
+@keyframes start {
+    0% {
+        opacity: 0;
+    }
+    75%{
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 /*遊戲進行於playArea區塊*/
 #playArea {

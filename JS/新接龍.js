@@ -1,5 +1,7 @@
 ﻿window.onload = function () {
     var c = console.log;
+    //開場
+    $("header").delay(6000).fadeOut(3000);
     //用start紀錄是否已經開始
     var start = false;
     //用moves來記錄移動次數
@@ -73,7 +75,8 @@
         };
         var timerInit = setTimeout(function () { initialization(i); }, interval);
     };
-	newGame();
+    //等開場動畫結束後才初始化
+    setTimeout(newGame, 9000);
     //用以獲得元素CSS相關數值的函數(返回整數值)
     // 1. 創造一個函數產生器對象
     var functionGenerator = {
@@ -115,7 +118,7 @@
 			//檢查是否符合移動規則，不符合則強制退出，並用cardCount記錄移動張數
 			var cardCount = takeCardCheck($t);
             if (cardCount == "overtake") {
-                $("#warning").text("Foul: Now you can only move " + maxTakeCheck() + " cards at once");
+                $("#warning").text("Foul: Now you can only move " + maxTakeCheck() + " cards at a time");
                 //將目標變透明
                 $t.css("opacity", 0.25);
                 return
