@@ -56,7 +56,7 @@
 		};
 		//將抽出的牌依序放入cardColumn中
 		var j = i % 8;
-		$(".cardColumn").eq(j).append('<div class="card" id="' + selectedCard.id + '" style="background-image: url(images/52cards/' + selectedCard.id + '.png); left: '+ (i+20) +'%; top: 70%;"></div>');
+		$(".cardColumn").eq(j).append('<div class="card" id="' + selectedCard.id + '" style="background-image: url(images/52cards/' + selectedCard.id + '.png); left: '+ (60) +'px; top: '+(120-i)+'px; z-index: '+ i +';"></div>');
 		//此卡牌的elem屬性指向剛創建的DOM元素
 		selectedCard.elem = $("#" + selectedCard.id);
 		//將dragElement函數套用於此DOM元素上
@@ -65,8 +65,8 @@
 		saveArray.push(selectedCard);
 		//清除卡牌的left及top值使其移動到應有位置，形成發牌動畫
 		setTimeout(function(){
-			$("#" + selectedCard.id).css("top", "").css("left", "");
-		}, interval);
+			$("#" + selectedCard.id).css("top", "").css("left", "").css("z-index", "");
+		}, interval+(5200-interval*i*2));
 		//回調自身(i==51時，已經走了52次，此時停止遞迴呼叫)
 		if (i < 51) {
 			setTimeout(function () { initialization(i + 1, interval, arr); }, interval);
@@ -137,7 +137,7 @@
                 $t.css("opacity", 0.25);
                 return
             } else if (cardCount == "foul") {
-                $("#warning").text("Foul: Can NOT move this card now -- " + $t.attr("id"));
+                $("#warning").text("Foul: Can NOT move this card now");
                 //將目標變透明
                 $t.css("opacity", 0.25);
                 return
@@ -221,10 +221,6 @@
                 * 高於此則置於cardFolder
                 * 且進一步做更複雜的判斷
                 */
-                //將目標的top值清空才能吃到space的預設值
-                changeCards($t, cardCount, function(card, i){
-					card.css("top", "");
-				});
                 //此時若count == 0 表示目標位置為第一欄， count == 1 表示目標位置為第二欄...
                 if (top + $gh($t) / 2 <= $gh("#gameInfo") + $gh("#cardSpace")) {
                     //移動至cardSpace中的某欄
@@ -297,7 +293,7 @@
     };
 	//拿取目標元素時檢測規則的函數(count記錄總共拿幾張卡)
     function takeCardCheck($t, count = 1) {
-        //測試時將這裡添加return 1就可以隨意移動卡牌
+        //測試點：將這裡添加return 1就可以隨意移動卡牌
 		//return 1
         //每一圈都檢查是否超過最大可拿取數量，如果超過就返回"overtake"
         if (count > maxTakeCheck()) { return "overtake" };
@@ -350,7 +346,7 @@
             if (cardLast.color != card$t.color && cardLast.num - card$t.num == 1) {
                 return true
             } else {
-                //測試時將這裡修改為true就可以隨意移動卡牌
+                //測試點：將這裡修改為true就可以隨意堆疊卡牌
                 return false
             };
         }
@@ -431,24 +427,39 @@
 		//在遊戲初始化完成後開始計時
 		startGameTimer();
     };
-	//點擊「新遊戲」
+    //點擊「NEW」
+    $(".new_game").click(function () {
+        //若遊戲尚未開始則返回
+        if (!start) { return };
+        //讓newGameMsg出現
+        $("#newGameMsg").stop().fadeIn(300);
+    });
+    //點擊「RESTART」
+    $("aside .restart").click(function () {
+        //若遊戲尚未開始則返回
+        if (!start) { return };
+        //讓restartMsg出現
+        $("#restartMsg").stop().fadeIn(300);
+    });
+	//點擊「Start A New Game」
 	$(".start_a_new_game").click(function(){
-		//若遊戲尚未開始則返回
-		if (!start){return};
 		//移除所有卡牌
 		$(".card").remove();
 		//調用遊戲初始化函數
 		newGame();
 		//移動次數重置
-		moves = 0;
-		movesRefresh();
+        moves = 0;
+        start = true;
+        movesRefresh();
+        start = false;
 		//計時器重置
 		resetGameTimer();
-		//讓通關訊息消失(如果有出現)
-		$("#completeMsg").stop().fadeOut(100);
+		//讓相關訊息消失(如果有出現)
+        $("#completeMsg").stop().fadeOut(100);
+        $("#newGameMsg").stop().fadeOut(100);
 	});
-	//點擊「重新開始」
-	$(".restart").click(function(){
+	//點擊「Restart The Current Game」
+    $(".restartBtn").click(function(){
 		//若遊戲尚未開始則返回
 		if (!start){return};
 		//移動次數重置
@@ -464,6 +475,13 @@
 		$(".card").remove();
 		//進行初始化
 		initialization(0, 50, saveArray);
+        //讓相關訊息消失(如果有出現)
+        $("#restartMsg").stop().fadeOut(100);
+    });
+    //點擊「Back To The Current Game」
+    $(".backBtn").click(function () {
+        //關閉所有提示框
+        $("section").stop().fadeOut(100);
     });
     //儲存遊戲過程的函數(需傳入移動張數cardCount)
     var recArray = [];
@@ -477,8 +495,8 @@
     }
 	//按下「undo」
     $(".undo").click(function () {
-        //若moves為0則返回
-        if (!moves) { return };
+        //若moves為0或遊戲尚未開始則返回
+        if (!moves || !start) { return };
         //取出recArray中最後一筆紀錄
         var dataArray = recArray.pop();
         //取得id及原來位置、移動張數
@@ -496,8 +514,11 @@
     });
 	//判斷是否通關的函數
 	function completeCheck(){
-		var sortedCards = $(".scoreArea .card").length;
-		if (sortedCards == 1){
+        var sortedCards = $(".scoreArea .card").length;
+        //測試點：修改這裡的張數可以快速通關
+        if (sortedCards == 52) {
+            //改變start狀態
+            start = false;
 			//停止計時
 			pauseGameTimer();
 			//修改通關訊息

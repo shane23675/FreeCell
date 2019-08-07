@@ -3,6 +3,7 @@
     padding: 0;
     user-select: none;
 	font-family: Roboto Slab;
+    font-weight: 600;
 }
 @font-face{
     font-family: 'Roboto Slab';
@@ -301,7 +302,67 @@ div.cardColumn:nth-child(8) > .card {
 	line-height: 50px;
 	margin: 0 auto;
 }
-
-
-
-
+/*新開一局、重新開始訊息*/
+section {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    z-index: 10000;
+    text-align: center;
+}
+section>div {
+    width: 700px;
+    height: 400px;
+    background: white;
+    border-radius: 20px;
+    margin: 200px auto;
+}
+section img {
+    width: 134.79px;
+    margin: 62.52px auto 0px;
+}
+.info {
+    height: 67px;
+    font-size: 24px;
+    color: #4B4B4B;
+    margin-top: 10.36px;
+}
+.restartInfo {
+    line-height: 35px;
+}
+.newGameInfo {
+    line-height: 67px;
+}
+section .restartBtn {
+    width: 365px;
+    height: 50px;
+    line-height: 50px;
+    background: #3F869B;
+    color: white;
+    margin: 35px auto 0px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 24px;
+}
+section .newGameBtn {
+    margin: 35px auto 0px;
+    color: white;
+    /*其他樣式已經在上方定義過*/
+}
+.backBtn {
+    width: 292.07px;
+    height: 50px;
+    color: #3F869B;
+    font-size: 20px;
+    line-height: 50px;
+    margin: 15px auto;
+    cursor: pointer;
+    border: 3px white solid;
+    border-radius: 100px;
+}
+.backBtn:hover {
+    border: 3px #3F869B solid;
+}
