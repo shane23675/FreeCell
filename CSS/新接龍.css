@@ -2,6 +2,11 @@
     margin: 0;
     padding: 0;
     user-select: none;
+	font-family: Roboto Slab;
+}
+@font-face{
+    font-family: 'Roboto Slab';
+    src: url('../font/RobotoSlab-regular.ttf');
 }
 main {
     position: relative;
@@ -67,6 +72,7 @@ aside .new_game {
     left: 23px;
     top: 120px;
     cursor: pointer;
+    transition: all 0.5s;
 }
 aside .restart {
     width: 87.99px;
@@ -75,6 +81,7 @@ aside .restart {
     left: 9px;
     top: 252px;
     cursor: pointer;
+    transition: all 0.5s;
 }
 aside .undo {
     width: 59px;
@@ -89,8 +96,8 @@ aside .undo {
 /*遊戲資訊(Logo、警告訊息、時間、移動次數)*/
 #gameInfo {
     height: 120px;
-    font-size: 27px;
-    font-weight: 700;
+    font-size: 21px;
+	font-weight: 600;
     color: white;
     text-align: right;
     line-height: 50px;
@@ -261,10 +268,39 @@ div.cardColumn:nth-child(8) > .card {
 	transform: translateY(-10px);
 	
 }
-
-
-
-
+/*通關訊息*/
+#completeMsg {
+	display: none;
+	position: absolute;
+	width: 400px;
+	text-align: center;
+	color: white;
+	top: 372px;
+	left: 50%;
+	transform: translateX(-50%);
+	font-weight: 600;
+	overflow: hidden;
+}
+#completeMsg .header {
+	font-size: 36px;
+	line-height: 48px;
+	margin-bottom: 31px;
+}
+#completeMsg .record {
+	font-size: 24px;
+	line-height: 50px;
+	margin-bottom: 62px;
+}
+.newGameBtn {
+	width: 292.07px;
+	height: 50px;
+	border-radius: 25px;
+	background: #3F869B;
+	cursor: pointer;
+	font-size: 24px;
+	line-height: 50px;
+	margin: 0 auto;
+}
 
 
 

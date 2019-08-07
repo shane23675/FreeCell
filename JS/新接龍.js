@@ -6,6 +6,8 @@
     var start = false;
     //用moves來記錄移動次數
     var moves = 0;
+	//用cardArray來裝填所有的Card物件
+	var cardArray = [];
 	//用saveArray儲存這局的原始卡牌位置
 	var saveArray = [];
 	//定義一個變量讓被拿取卡牌的z-index越來越大，能夠覆蓋其他卡牌
@@ -22,58 +24,70 @@
             this.color = "black";
         };
     };
+	//創建club1 ~ spade13 代表各張撲克牌
+	var suitArray = ["club", "diamond", "heart", "spade"];
+	suitArray.forEach(function (item) {
+		for (var i = 1; i <= 13; i++) {
+			//window.club_1 = new Card(club, 1);...
+			var str = ("window." + item + "_" + i + "= new Card('" + item + "'," + i + ");");
+			eval(str);
+			//cardArray.push(club_1);...
+			var str2 = "cardArray.push(" + item + "_" + i + ")";
+			eval(str2);
+		}
+	});
     //從DOM元素轉換為對應的Card物件的函數
     function toCard($t) {
         return eval($t.attr("id"))
     };
-    //新開一局的函數
+	//初始化的函數
+	function initialization(i, interval, arr) {
+		//改變NEW及RESTART透明度
+		$(".new_game").css("opacity", 0.25);
+		$(".restart").css("opacity", 0.25);
+		//若傳入的arr為saveArray，表示是按下restart
+		if (arr != saveArray){
+			//隨機產生一個51以下的整數
+			var randInt = parseInt(Math.random() * arr.length) //0~51
+			//將牌「抽出來」(起始值, 去除數量) **注意：splice函數會將該item真的從arr中移除並返回一個只有該item的Array，所以是真的「抽出來」
+			var selectedCard = arr.splice(randInt, 1)[0];
+		}else{
+			var selectedCard = arr[i];
+		};
+		//將抽出的牌依序放入cardColumn中
+		var j = i % 8;
+		$(".cardColumn").eq(j).append('<div class="card" id="' + selectedCard.id + '" style="background-image: url(images/52cards/' + selectedCard.id + '.png); left: '+ (i+20) +'%; top: 70%;"></div>');
+		//此卡牌的elem屬性指向剛創建的DOM元素
+		selectedCard.elem = $("#" + selectedCard.id);
+		//將dragElement函數套用於此DOM元素上
+		dragElement(selectedCard.elem);
+		//儲存卡牌抽出的順序
+		saveArray.push(selectedCard);
+		//清除卡牌的left及top值使其移動到應有位置，形成發牌動畫
+		setTimeout(function(){
+			$("#" + selectedCard.id).css("top", "").css("left", "");
+		}, interval);
+		//回調自身(i==51時，已經走了52次，此時停止遞迴呼叫)
+		if (i < 51) {
+			setTimeout(function () { initialization(i + 1, interval, arr); }, interval);
+		} else {
+			//發牌完成，遊戲開始計時
+			timeStart();
+			start = true;
+			//恢復NEW及RESTART透明度
+			$(".new_game").css("opacity", "");
+			$(".restart").css("opacity", "");
+		};
+	};
+	//新開一局的函數
     function newGame() {
 		//初始化前先確定start為false，saveArray為空
 		start = false;
 		saveArray = [];	
-		//創建club1 ~ spade13 代表各張撲克牌
-		var suitArray = ["club", "diamond", "heart", "spade"];
-		//用cardArray來裝填所有的Card物件
-		var cardArray = [];
-		suitArray.forEach(function (item) {
-			for (var i = 1; i <= 13; i++) {
-				//window.club_1 = new Card(club, 1);...
-				var str = ("window." + item + "_" + i + "= new Card('" + item + "'," + i + ");");
-				eval(str);
-				//cardArray.push(club_1);...
-				var str2 = "cardArray.push(" + item + "_" + i + ")";
-				eval(str2);
-			}
-		});
-		//初始化的函數
-        var i = 0;
-        var interval = 50;
-        function initialization(i) {
-            //從cardArray中隨機選一張牌
-            var randInt = parseInt(Math.random() * cardArray.length) //0~51
-            //將牌「抽出來」(起始值, 去除數量) **注意：splice函數會將該item真的從cardArray中移除並返回一個只有該item的Array，所以是真的「抽出來」
-            var selectedCard = cardArray.splice(randInt, 1)[0];
-            //將抽出的牌依序放入cardColumn中
-            var j = i % 8;
-            $(".cardColumn").eq(j).append('<div class="card" id="' + selectedCard.id + '" style="background-image: url(images/52cards/' + selectedCard.id + '.png)"></div>');
-            //此卡牌的elem屬性指向剛創建的DOM元素
-            selectedCard.elem = $("#" + selectedCard.id);
-            //將dragElement函數套用於此DOM元素上
-            dragElement(selectedCard.elem);
-			//儲存卡牌抽出的順序
-			saveArray.push(selectedCard);
-            //回調自身(i==51時，已經走了52次，此時停止遞迴呼叫)
-            if (i < 51) {
-                setTimeout(function () { initialization(i + 1); }, interval);
-            } else {
-                //發牌完成，遊戲開始計時
-                timeStart();
-                start = true;
-				//刪除初始化使用的定時器
-				clearTimeout(timerInit);
-            };
-        };
-        var timerInit = setTimeout(function () { initialization(i); }, interval);
+		//給cardArray製造一個複製品
+		var cardArrayClone = cardArray.slice();
+		//進行初始化
+        initialization(0, 50, cardArrayClone);
     };
     //等開場動畫結束後才初始化
     setTimeout(newGame, 9000);
@@ -235,6 +249,8 @@
                     moves++;
                     //刷新移動次數資訊
                     movesRefresh();
+					//檢查是否通關
+					completeCheck();
                 };
                 //移除main的mousemove事件
                 $p.off("mousemove");
@@ -281,6 +297,8 @@
     };
 	//拿取目標元素時檢測規則的函數(count記錄總共拿幾張卡)
     function takeCardCheck($t, count = 1) {
+        //測試時將這裡添加return 1就可以隨意移動卡牌
+		//return 1
         //每一圈都檢查是否超過最大可拿取數量，如果超過就返回"overtake"
         if (count > maxTakeCheck()) { return "overtake" };
 		//目標後面沒有任何card，可以移動並返回總張數
@@ -414,7 +432,9 @@
 		startGameTimer();
     };
 	//點擊「新遊戲」
-	$(".new_game").click(function(){
+	$(".start_a_new_game").click(function(){
+		//若遊戲尚未開始則返回
+		if (!start){return};
 		//移除所有卡牌
 		$(".card").remove();
 		//調用遊戲初始化函數
@@ -424,41 +444,26 @@
 		movesRefresh();
 		//計時器重置
 		resetGameTimer();
+		//讓通關訊息消失(如果有出現)
+		$("#completeMsg").stop().fadeOut(100);
 	});
 	//點擊「重新開始」
 	$(".restart").click(function(){
+		//若遊戲尚未開始則返回
+		if (!start){return};
 		//移動次數重置
 		moves = 0;
         movesRefresh();
-        //將所有卡牌的z-index重設
-        $(".card").css("z-index", "");
+        //將z-index重設
         zIndex = 1;
 		//改變start狀態
 		start = false;
 		//計時器重置
 		resetGameTimer();
-        var i = 0;
-        var interval = 50;
-        function restart(i) {
-            var j = i % 8;
-			//輪流取得cardColumn各個直行做為新位置
-			var $newPlace = $(".cardColumn").eq(j);
-			//取得目標移動物(saveArray中裝的是Card物件，必須調用其elem屬性來取得目標DOM)
-			var $t = saveArray[i].elem;
-			//調用移動的函數
-			moveCardDiv($t, $newPlace);
-            //回調自身(i==51時，已經走了52次，此時停止遞迴呼叫)
-            if (i < 51) {
-                setTimeout(function () { restart(i + 1); }, interval);
-            } else {
-                //重新發牌完成，遊戲開始計時
-                timeStart();
-                start = true;
-				//刪除初始化使用的定時器
-                clearTimeout(timerRestart);
-            };
-        };
-        var timerRestart = setTimeout(function () { restart(i); }, interval);
+		//刪除所有卡片
+		$(".card").remove();
+		//進行初始化
+		initialization(0, 50, saveArray);
     });
     //儲存遊戲過程的函數(需傳入移動張數cardCount)
     var recArray = [];
@@ -489,18 +494,28 @@
         moves --;
         movesRefresh();
     });
+	//判斷是否通關的函數
+	function completeCheck(){
+		var sortedCards = $(".scoreArea .card").length;
+		if (sortedCards == 1){
+			//停止計時
+			pauseGameTimer();
+			//修改通關訊息
+			$(".record").html($("#moves").text() + "<br>TIME: " + $("#time").text());
+			//顯示通關訊息
+			$("#completeMsg").stop().fadeIn(400);
+		}
+	};
 
 
 
 
-
-
-    ////測試用按鈕
-    //$("#btn1").click(function () {
-    //    c(toCard($("#club_1")));
-    //});
-    //$("#btn2").click(function () {
-    //    startGameTimer();
-    //});
+    //測試用按鈕
+    $("#btn1").click(function () {
+        pauseGameTimer();
+    });
+    $("#btn2").click(function () {
+        startGameTimer();
+    });
 
 };
