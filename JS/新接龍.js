@@ -179,6 +179,9 @@
             });
             //在window中放開滑鼠
             $(window).on("mouseup", function () {
+				//先記錄放開瞬間的left及top值
+				var releaseLeft = left;
+				var releaseTop = top;
                 //完成移動，先將目標及其下方卡牌的transition恢復原狀
                 changeCards($t, cardCount, function(card, i){
 					card.css("transition", "");
@@ -239,8 +242,13 @@
                     record($t, cardCount);
                     //調用card移動函數將目標及其下方卡牌移至新位置
                     changeCards($t, cardCount, function (card, i) {
-                        moveCardDiv(card, $newPlace);
+						//將原始位置傳入moveCardDiv讓新生成的卡牌從原始位置開始移動
+                        moveCardDiv(card, $newPlace, releaseLeft, releaseTop + i*44);
                     });
+					//50毫秒後將left和top清除才能產生動畫效果
+					setTimeout(function(){
+						$(".card").css("left", "").css("top", "");
+					}, 50);
                     //增加移動次數記錄
                     moves++;
                     //刷新移動次數資訊
@@ -278,7 +286,9 @@
 
 	};
 	//將card在DOM樹中移動的函數
-    function moveCardDiv($t, $newPlace) {
+    function moveCardDiv($t, $newPlace, releaseLeft, releaseTop) {
+		//將目標添加上原先位置
+		$t.css("left", releaseLeft + "px").css("top", releaseTop + "px");
         //新製造一個複製品
         var $tClone = $t.clone(false);
 		//此對應卡牌的elem屬性指向這個複製品
@@ -503,11 +513,19 @@
         var idStr = "#" + dataArray[0];
         var $origin = dataArray[1];
         var cardCount = dataArray[2];
+		//取得要undo的卡牌的目前位置(動畫從哪裡開始)
+		var fromLeft = $gl($(idStr));
+		var fromTop = $gt($(idStr));
+		c(fromLeft, fromTop);
         //移動並增加z-index
         changeCards($(idStr), cardCount, function ($t, i) {
             $t.css("z-index", zIndex++);
-            moveCardDiv($t, $origin);
+            moveCardDiv($t, $origin, fromLeft, fromTop+44*i);
         });
+		//50毫秒後再刪除其left和top值，實現動畫效果
+		setTimeout(function(){
+			$(".card").css("left", "").css("top", "");
+		}, 50);
         //更新移動次數
         moves --;
         movesRefresh();
