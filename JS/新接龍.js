@@ -186,7 +186,7 @@
                 changeCards($t, cardCount, function(card, i){
 					card.css("transition", "");
 				});
-                /* 調整目標的X座標：
+                /* 從目標的X座標推斷新位置是在哪一欄(直行)：
                  * 以標準狀況來說的分界線是在60+110+(25/2), +110+25, +...
                  * 是用left+55 去對(目標卡牌的中心點X座標)
                  * 也就是若left+55 < 60+110+(25/2)為第一排, left+25 < 60+110+(25/2) + (110+25)*1 為第二排
@@ -204,26 +204,18 @@
                 var threshold = $gpl($cf) + ($gw($col) + $gmr($col)) / 2;
                 var interval = $gw($col) + $gmr($col);
                 var count = 0;
+                var align = left;
                 while (true) {
                     //第一次比較時threshold為60+55=115，第二次為115+135*1...
-                    if (left < threshold) {
-                        //left小於閾值時，left值應為60+135*count才能對齊
-                        left = $gpl($cf) + interval * count;
-                        changeCards($t, cardCount, function(card, i){
-							card.css("left", left);
-						});
+                    if (align < threshold) {
+                        //align小於閾值時跳出迴圈，什麼都不必做，下面可以透過count得知要移動的位置
                         break;
                     } else {
                         threshold += interval;
                         count++;
                     };
                 };
-               /* 調整目標的Y座標：
-                * 先判斷卡牌的中心點Y座標有沒有低於gameInfo + cardSpace的高度
-                * 若低於此則將卡牌置於cardSpace中
-                * 高於此則置於cardFolder
-                * 且進一步做更複雜的判斷
-                */
+                // 從目標的Y座標得知是在cardSpace還是cardFolder：
                 //此時若count == 0 表示目標位置為第一欄， count == 1 表示目標位置為第二欄...
                 if (top + $gh($t) / 2 <= $gh("#gameInfo") + $gh("#cardSpace")) {
                     //移動至cardSpace中的某欄
@@ -232,30 +224,26 @@
                     //移動至cardColumn中的某欄
                     var $newPlace = $cf.find("div.cardColumn:nth-child(" + (count + 1) + ")");
                 };
-				//將將所有卡牌的top及left值清除(如果接下來因為違規而沒有被移動，就會回到原來位置)
-				changeCards($t, cardCount, function (card, i) {
-					card.css("top", "").css("left", "");
-				});
                 //檢查此放置行動是否符合規則
                 if (placeCardCheck($t, $newPlace, cardCount)) {
                     //符合規則，先將目標的原來位置做記錄
                     record($t, cardCount);
                     //調用card移動函數將目標及其下方卡牌移至新位置
-                    changeCards($t, cardCount, function (card, i) {
-						//將原始位置傳入moveCardDiv讓新生成的卡牌從原始位置開始移動
-                        moveCardDiv(card, $newPlace, releaseLeft, releaseTop + i*44);
+                    changeCards($t, cardCount, function (card) {
+                        moveCardDiv(card, $newPlace);
                     });
-					//50毫秒後將left和top清除才能產生動畫效果
-					setTimeout(function(){
-						$(".card").css("left", "").css("top", "");
-					}, 50);
                     //增加移動次數記錄
                     moves++;
                     //刷新移動次數資訊
                     movesRefresh();
-					//檢查是否通關
-					completeCheck();
-                };
+                    //檢查是否通關
+                    completeCheck();
+                } else {
+                    //不符合規則，將將所有卡牌的top及left值清除使其回到原先位置
+                    changeCards($t, cardCount, function (card, i) {
+                        card.css("top", "").css("left", "");
+                    });
+                }
                 //移除main的mousemove事件
                 $p.off("mousemove");
                 //移除window的mouseup事件
@@ -286,10 +274,13 @@
 
 	};
 	//將card在DOM樹中移動的函數
-    function moveCardDiv($t, $newPlace, releaseLeft, releaseTop) {
-		//將目標添加上原先位置
-		$t.css("left", releaseLeft + "px").css("top", releaseTop + "px");
-        //新製造一個複製品
+    function moveCardDiv($t, $newPlace) {
+        //取得目標當前位置
+        var left = $gl($t);
+        var top = $gt($t);
+        //給目標寫入當前位置的行內樣式
+        $t.css("left", left + "px").css("top", top + "px");
+        //新製造一個複製品，會保留原目標的top及left值，所以複製品會先留在原位
         var $tClone = $t.clone(false);
 		//此對應卡牌的elem屬性指向這個複製品
 		var card$t = toCard($t);
@@ -300,6 +291,10 @@
         $newPlace.append($tClone);
         //重新幫$tClone綁定dragElement
         dragElement($tClone);
+        //設定一個定時器，時間到後$tClone的left及top值清空，形成動畫
+        setTimeout(function () {
+            $tClone.css("left", "").css("top", "");
+        }, 20);
     };
 	//拿取目標元素時檢測規則的函數(count記錄總共拿幾張卡)
     function takeCardCheck($t, count = 1) {
@@ -513,19 +508,11 @@
         var idStr = "#" + dataArray[0];
         var $origin = dataArray[1];
         var cardCount = dataArray[2];
-		//取得要undo的卡牌的目前位置(動畫從哪裡開始)
-		var fromLeft = $gl($(idStr));
-		var fromTop = $gt($(idStr));
-		c(fromLeft, fromTop);
         //移動並增加z-index
         changeCards($(idStr), cardCount, function ($t, i) {
             $t.css("z-index", zIndex++);
-            moveCardDiv($t, $origin, fromLeft, fromTop+44*i);
+            moveCardDiv($t, $origin);
         });
-		//50毫秒後再刪除其left和top值，實現動畫效果
-		setTimeout(function(){
-			$(".card").css("left", "").css("top", "");
-		}, 50);
         //更新移動次數
         moves --;
         movesRefresh();
