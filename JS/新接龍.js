@@ -1,5 +1,11 @@
 ﻿window.onload = function () {
     var c = console.log;
+    //寫入<style>：cardColumn中的每張牌的top值
+    var styleStr = "";
+    for (var i = 1; i <= 19; i++) {
+        styleStr += ".cardColumn div:nth-child("+ i +"){top: "+ (281 + 44 * i)+"px;}"
+    };
+    $("style").text(styleStr);
     //開場
     $("header").delay(6000).fadeOut(3000);
     //用start紀錄是否已經開始
@@ -295,6 +301,8 @@
         setTimeout(function () {
             $tClone.css("left", "").css("top", "");
         }, 20);
+        //重設遊戲區域高度
+        heightReset();
     };
 	//拿取目標元素時檢測規則的函數(count記錄總共拿幾張卡)
     function takeCardCheck($t, count = 1) {
@@ -532,16 +540,27 @@
 			$("#completeMsg").stop().fadeIn(400);
 		}
 	};
+    //動態改變遊戲區域高度的函數
+    function heightReset() {
+        var max = 0;
+        for (var i = 0; i < 8; i++) {
+            //依序取出每個cardColumn中的card數量，找出其最大值
+            var cardAmount = $(".cardColumn").eq(i).find(".card").length;
+            max = max > cardAmount ? max : cardAmount;
+        }
+        //改變遊戲區域高度
+        var height = 800 + (max - 7) * 44
+        $("#playArea").css("height", height + "px");
+        $("aside").css("height", height + "px");
+    }
+    
 
-
-
-
-    //測試用按鈕
-    $("#btn1").click(function () {
-        pauseGameTimer();
-    });
-    $("#btn2").click(function () {
-        startGameTimer();
-    });
+    ////測試用按鈕
+    //$("#btn1").click(function () {
+    //    c(heightReset());
+    //});
+    //$("#btn2").click(function () {
+    //    startGameTimer();
+    //});
 
 };

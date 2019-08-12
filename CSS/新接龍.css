@@ -28,7 +28,7 @@ header {
 }
 #logo {
     position: absolute;
-    top: 30%;
+    top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 646.89px;
@@ -51,20 +51,22 @@ header {
 #playArea {
     position: relative;
     width: 1175px;
-    height: 1100px;
+    min-height: 800px;
     background: -webkit-linear-gradient(270deg, #525252, #001F1D);
     background: -moz-linear-gradient(180deg, #525252, #001F1D);
     background: -o-linear-gradient(180deg, #525252, #001F1D);
     background: linear-gradient(180deg, #525252, #001F1D);
     float: left;
+    transition: all 0.3s;
 }
 /*遊戲選項*/
 aside {
     position: relative;
     width: 105px;
-    height: 1100px;
+    min-height: 800px;
     float: left;
     background: #001F1D;
+    transition: all 0.3s;
 }
 aside .new_game {
     width: 60px;
@@ -181,45 +183,11 @@ aside .undo {
     margin-right: 25px;
     float: left;
 }
+/*每個cardColumn中第n張牌的top值，使用JS計算後寫入<style>標籤中
 .cardColumn div:nth-child(1){
     top: 325px;
-}
-.cardColumn div:nth-child(2){
-    top: 369px;
-}
-.cardColumn div:nth-child(3){
-    top: 413px;
-}
-.cardColumn div:nth-child(4){
-    top: 457px;
-}
-.cardColumn div:nth-child(5){
-    top: 501px;
-}
-.cardColumn div:nth-child(6){
-    top: 545px;
-}
-.cardColumn div:nth-child(7){
-    top: 589px;
-}
-.cardColumn div:nth-child(8){
-    top: 633px;
-}
-.cardColumn div:nth-child(9){
-    top: 677px;
-}
-.cardColumn div:nth-child(10){
-    top: 721px;
-}
-.cardColumn div:nth-child(11){
-    top: 765px;
-}
-.cardColumn div:nth-child(12){
-    top: 809px;
-}
-.cardColumn div:nth-child(13){
-    top: 853px;
-}
+}...
+*/
 /*每一欄(直行)的預設left值*/
 #cardSpace > div:nth-child(1) .card,
 div.cardColumn:nth-child(1) > .card {
