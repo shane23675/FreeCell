@@ -176,6 +176,9 @@ aside .undo {
 .scoreArea div.card {
     top: 120px;
 }
+.scoreArea::after {
+    content: "A";
+}
 /*卡片堆疊區(下方)*/
 #cardFolder {
     height: 522px;

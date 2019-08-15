@@ -553,14 +553,41 @@
         $("#playArea").css("height", height + "px");
         $("aside").css("height", height + "px");
     }
-    
+    //判斷是否有可以自動移至得分區的卡的函數
+    function autoMove() {
+        /*
+         * 依序找每一列最下方的卡牌(包含左上角space區)
+         * 如果是A: 只要有得分區有空位就直接移動
+         * 如果是2: 只要得分區有同樣花色的A就直接移動
+         * 其他: 如果比該卡牌數字小1且顏色不同的卡和該花色的卡都已在得分區，才可以移動
+         */
+        //先找到每一列最下面的卡
+        var $cardInSpace = $(".space>.card");
+        var $cardInCardColumn = $(".cardColumn>.card:last-child");
+        //判斷是否可移動的函數
+        function canMoveOrNot($cards) {
+            for (var i = 0; i < $cards.length; i++) {
+                //依序取出卡
+                var $card = $cards.eq(i);
+                //若卡為A
+                if (toCard($card).num == 1) {
+                    //找到第一個空的scoreArea並將卡牌移入
+                    var $pos = $(".scoreArea:empty").eq(0);
+                    moveCardDiv($card, $pos);
+                }
+                //若卡為2
+            }
+        }
+        canMoveOrNot($cardInSpace);
+        canMoveOrNot($cardInCardColumn);
+    }
 
-    ////測試用按鈕
-    //$("#btn1").click(function () {
-    //    c(heightReset());
-    //});
-    //$("#btn2").click(function () {
-    //    startGameTimer();
-    //});
+    //測試用按鈕
+    $("#btn1").click(function () {
+        autoMove();
+    });
+    $("#btn2").click(function () {
+        startGameTimer();
+    });
 
 };
