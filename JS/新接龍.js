@@ -322,7 +322,7 @@
 	//拿取目標元素時檢測規則的函數(count記錄總共拿幾張卡)
     function takeCardCheck($t, count = 1) {
         //測試點：將這裡添加return 1就可以隨意移動卡牌
-		return 1
+		//return 1
         //每一圈都檢查是否超過最大可拿取數量，如果超過就返回"overtake"
         if (count > maxTakeCheck()) { return "overtake" };
 		//目標後面沒有任何card，可以移動並返回總張數
@@ -375,7 +375,8 @@
                 return true
             } else {
                 //測試點：將這裡修改為true就可以隨意堆疊卡牌
-                return true
+                //return true
+                return false
             };
         }
         //若放到左上方space
@@ -656,6 +657,34 @@
         canMoveOrNot($cardInSpace);
         canMoveOrNot($cardInCardColumn);
     }
+    //滑鼠置於scoreArea的卡片上可以讓同花色的卡牌變色
+    $(".scoreArea").delegate(".card:last-child", "mouseenter", function (event) {
+        var $card = $(".card");
+        for (var i = 0; i < $card.length; i++) {
+            var card = toCard($card.eq(i));
+            if (card.suit == toCard($(event.target)).suit) {
+                card.elem.css("filter", "invert(100%)");
+            }
+        }
+    })
+    $(".scoreArea").delegate(".card:last-child", "mouseleave", function () {
+        $(".card").css("filter", "");
+    })
+    //滑鼠置於cardColumn的卡片上可以讓不同顏色且數字+1的卡牌變色
+    $(".cardColumn").delegate(".card", "mouseenter", function (event) {
+        var $card = $(".card");
+        for (var i = 0; i < $card.length; i++) {
+            var card = toCard($card.eq(i));
+            if (card.color != toCard($(event.target)).color && card.num - 1 == toCard($(event.target)).num) {
+                card.elem.css("filter", "invert(100%)");
+            }
+        }
+    })
+    $(".cardColumn").delegate(".card", "mouseleave", function () {
+        $(".card").css("filter", "");
+    })
+
+
 
     ////測試用按鈕
     //$("#btn1").click(function () {
