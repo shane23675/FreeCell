@@ -670,21 +670,23 @@
     $(".scoreArea").delegate(".card:last-child", "mouseleave", function () {
         $(".card").css("filter", "");
     })
-    //滑鼠置於cardColumn的卡片上可以讓不同顏色且數字+1的卡牌變色
-    $(".cardColumn").delegate(".card", "mouseenter", function (event) {
-        var $card = $(".card");
-        for (var i = 0; i < $card.length; i++) {
-            var card = toCard($card.eq(i));
-            if (card.color != toCard($(event.target)).color && card.num - 1 == toCard($(event.target)).num) {
-                card.elem.css("filter", "invert(100%)");
+    //滑鼠置於cardColumn及space的卡片上可以讓不同顏色且數字+1的卡牌變色
+    function hoverHint($target) {
+        $target.delegate(".card", "mouseenter", function (event) {
+            var $card = $(".card");
+            for (var i = 0; i < $card.length; i++) {
+                var card = toCard($card.eq(i));
+                if (card.color != toCard($(event.target)).color && card.num - 1 == toCard($(event.target)).num) {
+                    card.elem.css("filter", "invert(100%)");
+                }
             }
-        }
-    })
-    $(".cardColumn").delegate(".card", "mouseleave", function () {
-        $(".card").css("filter", "");
-    })
-
-
+        });
+        $target.delegate(".card", "mouseleave", function () {
+            $(".card").css("filter", "");
+        });
+    };
+    hoverHint($(".cardColumn"));
+    hoverHint($(".space"));
 
     ////測試用按鈕
     //$("#btn1").click(function () {
