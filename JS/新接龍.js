@@ -76,13 +76,18 @@
 		//回調自身(i==51時，已經走了52次，此時停止遞迴呼叫)
 		if (i < 51) {
 			setTimeout(function () { initialization(i + 1, interval, arr); }, interval);
-		} else {
-			//發牌完成，遊戲開始計時
-			timeStart();
-			start = true;
-			//恢復NEW及RESTART透明度
-			$(".new_game").css("opacity", "");
-			$(".restart").css("opacity", "");
+        } else {
+            //等待52個interval(讓牌發出來的時間)後遊戲正式開始
+            setTimeout(function () {
+                //發牌完成，遊戲開始計時
+                timeStart();
+                start = true;
+                //檢查是否有可自動移動的卡牌
+                autoMove();
+                //恢復NEW及RESTART透明度
+                $(".new_game").css("opacity", "");
+                $(".restart").css("opacity", "");
+            }, interval*52)
 		};
 	};
 	//新開一局的函數
@@ -242,12 +247,18 @@
                     moves++;
                     //刷新移動次數資訊
                     movesRefresh();
+                    //進行自動移動
+                    autoMove();
                     //檢查是否通關
                     completeCheck();
                 } else {
                     //不符合規則，將將所有卡牌的top及left值清除使其回到原先位置
-                    changeCards($t, cardCount, function (card, i) {
+                    changeCards($t, cardCount, function (card) {
                         card.css("top", "").css("left", "");
+                    });
+                    //0.4秒後將所有卡牌的z-index清除
+                    changeCards($t, cardCount, function (card) {
+                        card.css("z-index", "");
                     });
                 }
                 //移除main的mousemove事件
@@ -284,8 +295,8 @@
         //取得目標當前位置
         var left = $gl($t);
         var top = $gt($t);
-        //給目標寫入當前位置的行內樣式
-        $t.css("left", left + "px").css("top", top + "px");
+        //給目標寫入當前位置的行內樣式，並增加其z-index
+        $t.css("left", left + "px").css("top", top + "px").css("z-index", zIndex++);
         //新製造一個複製品，會保留原目標的top及left值，所以複製品會先留在原位
         var $tClone = $t.clone(false);
 		//此對應卡牌的elem屬性指向這個複製品
@@ -301,13 +312,17 @@
         setTimeout(function () {
             $tClone.css("left", "").css("top", "");
         }, 20);
+        //0.4秒後消除移動物之z-index(此時移動動畫已完成)
+        setTimeout(function () {
+            $tClone.css("z-index", "");
+        }, 400);
         //重設遊戲區域高度
         heightReset();
     };
 	//拿取目標元素時檢測規則的函數(count記錄總共拿幾張卡)
     function takeCardCheck($t, count = 1) {
         //測試點：將這裡添加return 1就可以隨意移動卡牌
-		//return 1
+		return 1
         //每一圈都檢查是否超過最大可拿取數量，如果超過就返回"overtake"
         if (count > maxTakeCheck()) { return "overtake" };
 		//目標後面沒有任何card，可以移動並返回總張數
@@ -360,7 +375,7 @@
                 return true
             } else {
                 //測試點：將這裡修改為true就可以隨意堆疊卡牌
-                return false
+                return true
             };
         }
         //若放到左上方space
@@ -508,6 +523,8 @@
     }
 	//按下「undo」
     $(".undo").click(function () {
+        //用來記錄該undo是否是在autoMove之後發生
+        var autoMoveFlag = false;
         //若moves為0或遊戲尚未開始則返回
         if (!moves || !start) { return };
         //取出recArray中最後一筆紀錄
@@ -516,14 +533,25 @@
         var idStr = "#" + dataArray[0];
         var $origin = dataArray[1];
         var cardCount = dataArray[2];
+        //若cardCount為-1表示此undo是在autoMove之後發生
+        c(cardCount);
+        if (cardCount == -1) {
+            autoMoveFlag = true;
+            cardCount = 1;
+        }
         //移動並增加z-index
-        changeCards($(idStr), cardCount, function ($t, i) {
-            $t.css("z-index", zIndex++);
+        changeCards($(idStr), cardCount, function ($t) {
             moveCardDiv($t, $origin);
         });
-        //更新移動次數
-        moves --;
-        movesRefresh();
+        //若此undo是在autoMove之後發生，則再次觸發undo鍵且不進行後面的移動次數更新
+        if (autoMoveFlag) {
+            c("trigger undo");
+            $(".undo").trigger("click");
+        } else {
+            //更新移動次數
+            moves--;
+            movesRefresh();
+        };
     });
 	//判斷是否通關的函數
 	function completeCheck(){
@@ -559,35 +587,82 @@
          * 依序找每一列最下方的卡牌(包含左上角space區)
          * 如果是A: 只要有得分區有空位就直接移動
          * 如果是2: 只要得分區有同樣花色的A就直接移動
-         * 其他: 如果比該卡牌數字小1且顏色不同的卡和該花色的卡都已在得分區，才可以移動
+         * 其他: 如果比該卡牌數字小2且顏色不同的卡和跟該卡牌花色相同且數字小1的卡都已在得分區，才可以移動
          */
+        //先檢查是否通關
+        completeCheck();
         //先找到每一列最下面的卡
         var $cardInSpace = $(".space>.card");
         var $cardInCardColumn = $(".cardColumn>.card:last-child");
         //判斷是否可移動的函數
         function canMoveOrNot($cards) {
             for (var i = 0; i < $cards.length; i++) {
+                //用moveFlag判斷最後是否可以移動，$pos紀錄移動目標位置
+                var moveFlag = true;
+                var $pos;
                 //依序取出卡
                 var $card = $cards.eq(i);
                 //若卡為A
                 if (toCard($card).num == 1) {
                     //找到第一個空的scoreArea並將卡牌移入
-                    var $pos = $(".scoreArea:empty").eq(0);
-                    moveCardDiv($card, $pos);
+                    $pos = $(".scoreArea:empty").eq(0);
                 }
                 //若卡為2
+                else if (toCard($card).num == 2) {
+                    //找到對應花色的A
+                    var $theA = eval(toCard($card).suit + "_" + 1).elem;
+                    //若該A位於得分區則將此2進行移動
+                    if ($theA.parent().attr("class") == "scoreArea") {
+                        $pos = $theA.parent();
+                    } else {
+                        moveFlag = false;
+                    }
+                }
+                //若卡為其他數字
+                else {
+                    var num = toCard($card).num - 2;
+                    suitArray.forEach(function (item) {
+                        //找到數字比目標卡牌小2的每張卡
+                        var card = eval(item + "_" + num);
+                        //判斷此卡是否顏色與目標卡牌不同
+                        if (card.color != toCard($card).color) {
+                            //判斷此卡目前位置，若不在scoreArea則更改moveFlag
+                            if (card.elem.parent().attr("class") != "scoreArea") {
+                                moveFlag = false;
+                            }
+                        }
+                    });
+                    //找到比和目標卡牌花色相同且數字小1的卡
+                    var $baseCard = $("#"+ toCard($card).suit + "_" + (toCard($card).num - 1));
+                    //判斷此卡目前位置，若不在scoreArea則更改moveFlag
+                    if ($baseCard.parent().attr("class") != "scoreArea") {
+                        moveFlag = false;
+                    } else {
+                        //若在scoreArea則紀錄其目前位置作為移動目標位置
+                        $pos = $baseCard.parent();
+                    };
+                }
+                //判斷是否進行移動
+                if (moveFlag) {
+                    c("moveing!!")
+                    //記錄原先位置，cardCount傳入-1表示此移動為autoMove
+                    record($card, -1);
+                    moveCardDiv($card, $pos);
+                    //結束此次搜尋並再搜尋一次(暫停0.2秒以免一次吸一堆牌看不清楚)
+                    return setTimeout(autoMove, 200)
+                }
             }
         }
         canMoveOrNot($cardInSpace);
         canMoveOrNot($cardInCardColumn);
     }
 
-    //測試用按鈕
-    $("#btn1").click(function () {
-        autoMove();
-    });
-    $("#btn2").click(function () {
-        startGameTimer();
-    });
+    ////測試用按鈕
+    //$("#btn1").click(function () {
+    //    autoMove();
+    //});
+    //$("#btn2").click(function () {
+    //    startGameTimer();
+    //});
 
 };
