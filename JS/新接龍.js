@@ -580,7 +580,7 @@
             for (var i = 0; i < 52; i++) {
                 var left = parseInt(Math.random() * 1365 -150);
                 var top = parseInt(Math.random() * 617 + 125);
-                var rotateDeg = parseInt(Math.random() * 3600);
+                var rotateDeg = parseInt(Math.random() * 720);
                 $(".card").eq(i).css({
                     "left": (left + "px"),
                     "top": (top + "px"),
