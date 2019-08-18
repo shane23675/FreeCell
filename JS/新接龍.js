@@ -257,9 +257,11 @@
                         card.css("top", "").css("left", "");
                     });
                     //0.4秒後將所有卡牌的z-index清除
-                    changeCards($t, cardCount, function (card) {
-                        card.css("z-index", "");
-                    });
+                    setTimeout(function () {
+                        changeCards($t, cardCount, function (card) {
+                            card.css("z-index", "");
+                        });
+                    }, 400);
                 }
                 //移除main的mousemove事件
                 $p.off("mousemove");
@@ -566,7 +568,25 @@
 			//修改通關訊息
 			$(".record").html($("#moves").text() + "<br>TIME: " + $("#time").text());
 			//顯示通關訊息
-			$("#completeMsg").stop().fadeIn(400);
+            $("#completeMsg").stop().fadeIn(400);
+            /*通關攤牌效果
+             * 這裡要製造一個卡牌散亂的效果
+             * 卡牌的left值會在0-1065px
+             * top值為0-642px
+             * 並隨機加入旋轉
+             */
+            //先增長過渡動畫時間
+            $(".card").css("transition", "all 1s");
+            for (var i = 0; i < 52; i++) {
+                var left = parseInt(Math.random() * 1365 -150);
+                var top = parseInt(Math.random() * 617 + 125);
+                var rotateDeg = parseInt(Math.random() * 3600);
+                $(".card").eq(i).css({
+                    "left": (left + "px"),
+                    "top": (top + "px"),
+                    "transform": ("rotate("+ rotateDeg +"deg)")
+                })
+            }
 		}
 	};
     //動態改變遊戲區域高度的函數

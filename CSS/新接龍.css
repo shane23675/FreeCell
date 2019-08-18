@@ -242,7 +242,6 @@ div.cardColumn:nth-child(8) > .card {
 }
 .card:hover {
 	transform: translateY(-10px);
-	
 }
 /*通關訊息*/
 #completeMsg {
