@@ -359,6 +359,8 @@
 	};
     //放置目標元素時檢測規則的函數
     function placeCardCheck($t, $newPlace, cardCount) {
+        //測試點：將這裡修改為true就可以隨意堆疊卡牌
+        //return true
         //透過$newPlace的class值來判斷是放到哪種區塊
         var p = $newPlace.attr("class");
         //獲取新位置最後一張卡的card對象
@@ -374,8 +376,6 @@
             if (cardLast.color != card$t.color && cardLast.num - card$t.num == 1) {
                 return true
             } else {
-                //測試點：將這裡修改為true就可以隨意堆疊卡牌
-                //return true
                 return false
             };
         }
@@ -393,8 +393,6 @@
         }
         //若放到右上方scoreArea
         else {
-            //測試點：這裡直接return true就可以一次放一堆卡牌在得分區
-            //return true
             //判斷是否拿了一張以上的卡片，如果有，返回false
             if (cardCount > 1) { return false };
             //如果新位置沒有任何卡(cardLast == undefined)，則只能放入A
@@ -579,7 +577,7 @@
             for (var i = 0; i < 52; i++) {
                 var left = parseInt(Math.random() * 1365 -150);
                 var top = parseInt(Math.random() * 617 + 300);
-                var rotateDeg = parseInt(Math.random() * 720);
+                var rotateDeg = parseInt(Math.random() * 360);
                 var distance = Math.sqrt(Math.pow($gl($(".card").eq(i)) - left, 2) + Math.pow($gt($(".card").eq(i)) - top, 2));
                 var t = distance / 1100 * 6;
                 //先增長過渡動畫時間
