@@ -323,8 +323,6 @@
     };
 	//拿取目標元素時檢測規則的函數(count記錄總共拿幾張卡)
     function takeCardCheck($t, count = 1) {
-        //測試點：將這裡添加return 1就可以隨意移動卡牌
-		//return 1
         //每一圈都檢查是否超過最大可拿取數量，如果超過就返回"overtake"
         if (count > maxTakeCheck()) { return "overtake" };
 		//目標後面沒有任何card，可以移動並返回總張數
@@ -337,8 +335,8 @@
             var card$t = toCard($t);
 			//取得下一張卡牌的card物件
             var card$tNext = toCard($t.next());
-			//比較兩張卡牌的顏色和數字是否符合規則
-			if (card$t.color != card$tNext.color && card$t.num - 1 == card$tNext.num){
+			//比較兩張卡牌的顏色和數字是否符合規則 測試點：這裡增加||true就可以亂拿一堆卡牌
+            if (card$t.color != card$tNext.color && card$t.num - 1 == card$tNext.num){
 				//符合規則，繼續往下檢查
 				count++;
 				return takeCardCheck($t.next(), count)
@@ -395,6 +393,8 @@
         }
         //若放到右上方scoreArea
         else {
+            //測試點：這裡直接return true就可以一次放一堆卡牌在得分區
+            //return true
             //判斷是否拿了一張以上的卡片，如果有，返回false
             if (cardCount > 1) { return false };
             //如果新位置沒有任何卡(cardLast == undefined)，則只能放入A
@@ -574,13 +574,16 @@
              * 卡牌的left值會在0-1065px
              * top值為0-642px
              * 並隨機加入旋轉
+             * 計算出移動距離後得出對應的移動時間
              */
-            //先增長過渡動畫時間
-            $(".card").css("transition", "all 1s");
             for (var i = 0; i < 52; i++) {
                 var left = parseInt(Math.random() * 1365 -150);
-                var top = parseInt(Math.random() * 617 + 125);
+                var top = parseInt(Math.random() * 617 + 300);
                 var rotateDeg = parseInt(Math.random() * 720);
+                var distance = Math.sqrt(Math.pow($gl($(".card").eq(i)) - left, 2) + Math.pow($gt($(".card").eq(i)) - top, 2));
+                var t = distance / 1100 * 6;
+                //先增長過渡動畫時間
+                $(".card").css("transition", "all "+t+"s cubic-bezier(0.12, 0.63, 0.34, 0.94)");
                 $(".card").eq(i).css({
                     "left": (left + "px"),
                     "top": (top + "px"),
