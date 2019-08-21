@@ -708,6 +708,11 @@
     };
     hoverHint($(".cardColumn"));
     hoverHint($(".space"));
+    //點擊「查看遊戲說明」
+    $("#showInstruction").click(function () {
+        $("#instruction").css("display", "block");
+        $(window).scrollTop($(window).scrollTop()+800) ;
+    });
 
     ////測試用按鈕
     //$("#btn1").click(function () {

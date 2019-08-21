@@ -73,8 +73,51 @@
     <footer>
         Copyright Infomation: <br />
         The UI design of this game is from <a href="https://xd.adobe.com/view/031b9901-dcec-422f-74e5-4db06fb0db63-752a/">Here</a><br />
-        To see original design works please click the link.
+        To see original design works please click the link.<br />
+        第一次玩新接龍？<a href="javascript:;" id="showInstruction">查看遊戲說明</a>
     </footer>
+    <div id="instruction">
+        <p class="title">遊戲規則</p>
+        如下圖，遊戲區分為三大區塊：
+        <br />堆疊區：在這裡可以依照規則疊放卡牌，按照規則疊放的卡牌可以整疊拿起和放下
+        <br />暫時放置區：這裡每格可以放置一張任意卡牌
+        <br />目標區：遊戲目標為將卡牌依照A到K的順序堆放在這裡，一種花色一疊
+        <br /><img src="images/instruction/basic.png" />
+        <p class="title">拿取及移動卡牌</p>
+        只能拿取堆疊區最下方或是暫時放置區的卡牌
+        <br />拿起後只能放在「顏色不同且數字比自己大1」的卡牌下方
+        <br />滑鼠置於某卡牌上後，該卡牌可以放置的地方會變色
+        <br /><img src="images/instruction/placing.png" />
+        <p class="title">拿取及移動多張卡牌</p>
+        依照上述「顏色不同且數字比自己大1」規則堆放的整疊卡牌可以同時移動
+        <br />拿取整疊卡中的某一張就可以移動下方所有卡牌
+        <br />並依照規則繼續堆疊到其他卡牌下方
+        <br /><img src="images/instruction/takeMultiple.png" />
+        <br /><img src="images/instruction/placeMultiple.png" />
+        <br />注意！拿取多張卡牌時，有最大數量限制
+        <br />最大拿取數量為(閒置的暫時放置區數量+1) * (閒置的堆疊區數量+1)
+        <br />超過拿取數量時會有錯誤提示
+        <br /><img src="images/instruction/maxTakeAmount.png" />
+        <br /><img src="images/instruction/maxTakeAmountHint.png" />
+        <p class="title">自動移動卡牌</p>
+        若系統判斷某卡牌可以移至目標區域且沒有堆疊價值時
+        <br />將會自動將卡牌移動至目標區
+        <br />並且不會增加移動次數
+        <br /><img src="images/instruction/autoMove.png" />
+        <br />注意：
+        <br />在上圖中，若是紅心3或方塊3還沒被移至目標區
+        <br />則梅花4會被判定為「有堆疊價值」
+        <br />因為可以在它下方放置紅心3或方塊3
+        <br />此時將不會進行自動移動
+        <p class="title">最後</p>
+        <img src="images/instruction/complete.png" />
+        <p class="title">其他遊戲功能</p>
+        MOVES：紀錄移動次數
+        <br />NEW：開始一局新遊戲(卡牌順序改變)
+        <br />RESTART：重新開始此局遊戲(卡牌順序不變)
+        <br />UNDO：復原上一次移動
+        <br /><img src="images/instruction/gameFunction.png" />
+    </div>
     <!--<button id="btn1">btn1</button>
     <button id="btn2">btn2</button>-->
 </body>
