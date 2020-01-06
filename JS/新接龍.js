@@ -168,7 +168,7 @@
             //在main中進行移動
             $p.on("mousemove", function (event) {
                 //移動目標
-                left = event.pageX - $gml("main") - mouseOffset[0];
+                left = event.pageX - $("main").offset().left - mouseOffset[0];
                 top = event.pageY - $gmt("main") - mouseOffset[1];
                 //移動不能超過$p的範圍
                 var maxLeft = $gw($p) - $gw($t);
